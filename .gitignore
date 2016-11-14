@@ -1,0 +1,30 @@
+# https://github.com/github/gitignore/blob/4f440157df037697bda55607c902635494f54c30/Maven.gitignore
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Exclude maven wrapper
+!/.mvn/wrapper/maven-wrapper.jar
+
+# https://github.com/github/gitignore/blob/988fd7a3d2dd92bd443cae50b461155b39ef396f/Global/Eclipse.gitignore
+.metadata
+.classpath
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+
+# Eclipse Core
+.project
