@@ -37,6 +37,10 @@ public class ProjectService {
         return projectHandlers.values().stream().map(p -> p.getDescriptor()).collect(Collectors.toList());
     }
 
+    public Page<Project> getAvailableProjects(Pageable p) {
+        return projectRepository.findAll(p);
+    }
+
     public Project getProject(String id) {
         Project p = projectRepository.findOne(id);
         if (p == null) {

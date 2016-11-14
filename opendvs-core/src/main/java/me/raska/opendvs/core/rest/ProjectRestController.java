@@ -29,6 +29,11 @@ public class ProjectRestController {
         return projectService.getAvailableHandlers();
     }
 
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public Page<Project> getAvailableProjects(Pageable p) {
+        return projectService.getAvailableProjects(p);
+    }
+
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Project getProject(@PathVariable("id") String projectId) {
         return projectService.getProject(projectId);
