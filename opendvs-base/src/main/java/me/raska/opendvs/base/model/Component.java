@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
+@JsonIdentityInfo(generator = JSOGGenerator.class)
 @Table(name = "COMPONENT", uniqueConstraints = { @UniqueConstraint(columnNames = { "component_group", "name" }) })
 public class Component {
     @Id

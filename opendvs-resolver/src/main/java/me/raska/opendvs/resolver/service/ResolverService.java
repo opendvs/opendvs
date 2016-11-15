@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import me.raska.opendvs.base.core.amqp.CoreRabbitService;
 import me.raska.opendvs.base.model.Component;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.artifact.ArtifactComponent;
@@ -34,6 +37,10 @@ public class ResolverService {
 
     @Autowired
     private ArtifactRepository artifactRepository;
+
+    @Autowired
+    @Qualifier(CoreRabbitService.FANOUT_QUALIFIER)
+    private RabbitTemplate fanoutTemplate;
 
     @Value("${opendvs.resolver.component.page_size:10}")
     private int pageSize;
@@ -104,7 +111,7 @@ public class ResolverService {
 
         if (!batchUpdate.isEmpty()) {
             artifactComponentRepository.save(batchUpdate);
-            // TODO: notify
+            fanoutTemplate.convertAndSend(batchUpdate);
         }
     }
 
@@ -148,7 +155,7 @@ public class ResolverService {
             if (log.isDebugEnabled()) {
                 log.debug("Determining state of component " + c.getId() + " due to component " + comp.getId());
             }
-            if (c.getState() != ArtifactComponent.State.UP_TO_DATE && c.getVersion().equals(comp.getLatestVersion())) {
+            if (c.getState() != ArtifactComponent.State.UP_TO_DATE && c.getVersion() != null && c.getVersion().equals(comp.getLatestVersion())) {
                 if (log.isDebugEnabled()) {
                     log.debug("Component " + c.getId() + " is up to date");
                 }
@@ -162,15 +169,15 @@ public class ResolverService {
 
                 c.setState(ArtifactComponent.State.OUTDATED);
                 batchUpdate.add(c);
-            }  else if (log.isDebugEnabled()) {
-                log.debug("Component " + c.getId() + " version couldn't be found in known versions " + compVersions);
+            } else if (log.isDebugEnabled()) {
+                log.debug("Component " + c.getId() + " version " + c.getVersion() + " couldn't be found in known versions " + compVersions);
             }
         }
 
         // update
         if (!batchUpdate.isEmpty()) {
             artifactComponentRepository.save(batchUpdate);
-            // TODO: notify
+            fanoutTemplate.convertAndSend(batchUpdate);
         }
 
         return acomps.nextPageable();

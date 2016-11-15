@@ -15,7 +15,7 @@ import javax.persistence.OneToOne;
 import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +24,7 @@ import me.raska.opendvs.base.model.artifact.Artifact;
 @Getter
 @Setter
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
+@JsonIdentityInfo(generator = JSOGGenerator.class)
 public class ProbeAction {
     @Id
     @GeneratedValue(generator = "uuid")

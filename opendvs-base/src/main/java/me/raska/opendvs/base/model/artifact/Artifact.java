@@ -20,7 +20,8 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -29,8 +30,8 @@ import me.raska.opendvs.base.model.project.Project;
 
 @Getter
 @Setter
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
 @Entity
+@JsonIdentityInfo(generator = JSOGGenerator.class)
 @Table(name = "ARTIFACT", uniqueConstraints = { @UniqueConstraint(columnNames = { "project_id", "identity" }) })
 public class Artifact {
     @Id
@@ -57,13 +58,16 @@ public class Artifact {
     @Enumerated(EnumType.STRING)
     private Type type;
 
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @OneToOne(fetch = FetchType.LAZY, optional = true, mappedBy = "artifact")
     private ProbeAction probeAction;
 
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "artifact")
     private Set<ArtifactComponent> components;
 

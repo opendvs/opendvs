@@ -11,7 +11,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +21,7 @@ import me.raska.opendvs.base.model.probe.ProbeActionStep;
 @Getter
 @Setter
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
+@JsonIdentityInfo(generator = JSOGGenerator.class)
 @Table(name = "ARTIFACT_COMPONENT", indexes = { @Index(columnList = "uid") })
 public class ArtifactComponent {
     @Id
@@ -50,9 +51,11 @@ public class ArtifactComponent {
 
     private String parentUid;
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(optional = false)
     private Artifact artifact;
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(optional = false)
     private ProbeActionStep probeActionStep;
 
