@@ -99,8 +99,8 @@ public class GitProjectTypeHandler implements ProjectTypeHandler {
         art.setType(Type.source);
         art.setUri(project.getTypeProperties().get("uri"));
         art.setSourceType(project.getType());
+        art.setName(art.getIdentity().substring(0, 7));
         art.setProject(project);
-        art.setName(art.getUri() + " " + art.getIdentity());
         art.setComponents(null);
         art.setId(null);
 
