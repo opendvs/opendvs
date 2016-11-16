@@ -72,9 +72,9 @@ public class ProbeWorkerService {
                         c.setState(ArtifactComponent.State.UNKNOWN);
                         art.getComponents().add(c);
                     });
+                    components.addAll(cs);
                 }
 
-                components.addAll(cs);
             });
         }
         act.setSteps(steps);
