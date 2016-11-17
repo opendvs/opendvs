@@ -87,7 +87,7 @@ public class ResolverService {
             }
             Set<String> compVersions = c.getVersions().stream().map(cv -> cv.getVersion()).collect(Collectors.toSet());
 
-            if (component.getState() != ArtifactComponent.State.UP_TO_DATE
+            if (component.getState() != ArtifactComponent.State.UP_TO_DATE && component.getVersion() != null
                     && component.getVersion().equals(c.getLatestVersion())) {
                 if (log.isDebugEnabled()) {
                     log.debug("Artifact (" + artifact + ") component " + component.getId() + " is up to date");
@@ -155,7 +155,8 @@ public class ResolverService {
             if (log.isDebugEnabled()) {
                 log.debug("Determining state of component " + c.getId() + " due to component " + comp.getId());
             }
-            if (c.getState() != ArtifactComponent.State.UP_TO_DATE && c.getVersion() != null && c.getVersion().equals(comp.getLatestVersion())) {
+            if (c.getState() != ArtifactComponent.State.UP_TO_DATE && c.getVersion() != null
+                    && c.getVersion().equals(comp.getLatestVersion())) {
                 if (log.isDebugEnabled()) {
                     log.debug("Component " + c.getId() + " is up to date");
                 }
@@ -170,7 +171,8 @@ public class ResolverService {
                 c.setState(ArtifactComponent.State.OUTDATED);
                 batchUpdate.add(c);
             } else if (log.isDebugEnabled()) {
-                log.debug("Component " + c.getId() + " version " + c.getVersion() + " couldn't be found in known versions " + compVersions);
+                log.debug("Component " + c.getId() + " version " + c.getVersion()
+                        + " couldn't be found in known versions " + compVersions);
             }
         }
 
