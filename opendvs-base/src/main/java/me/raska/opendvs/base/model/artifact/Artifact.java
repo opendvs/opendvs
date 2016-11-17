@@ -1,5 +1,6 @@
 package me.raska.opendvs.base.model.artifact;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -70,6 +71,8 @@ public class Artifact {
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "artifact")
     private Set<ArtifactComponent> components;
+
+    private Date initiated;
 
     public static enum Type {
         build, source

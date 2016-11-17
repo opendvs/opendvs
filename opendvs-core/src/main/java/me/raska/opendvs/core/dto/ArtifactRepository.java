@@ -8,5 +8,5 @@ import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.project.Project;
 
 public interface ArtifactRepository extends JpaRepository<Artifact, String> {
-    Page<Artifact> findByProject(Project project, Pageable page);
+    Page<Artifact> findByProjectOrderByInitiatedDesc(Project project, Pageable page);
 }

@@ -68,6 +68,7 @@ public class FilesystemProjectTypeHandler implements ProjectTypeHandler {
         artifact.setName(file.getOriginalFilename());
         artifact.setIdentity(Util.getFileSha1Checksum(f));
         artifact.setProject(project);
+        artifact.setInitiated(new Date());
         Artifact art = artifactRepository.save(artifact);
 
         ProbeAction action = new ProbeAction();
