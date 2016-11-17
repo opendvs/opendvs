@@ -38,6 +38,13 @@ public class Project {
     @Column(nullable = false)
     private String type;
 
+    /**
+     * Boundary for determining UP_TO_DATE / OUTDATED state (in days) when
+     * component is using semantic versioning (http://semver.org/) and major
+     * version doesn't equals latest major version
+     */
+    private int majorVersionOffset;
+
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "project")
     private List<Artifact> artifacts;
