@@ -1,5 +1,6 @@
 package me.raska.opendvs.base.model.poller;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -32,6 +33,12 @@ public class PollerActionStep {
 
     @Lob
     private String output;
+
+    private String poller;
+
+    private Date started;
+
+    private Date ended;
 
     @Enumerated(EnumType.STRING)
     private Type type;

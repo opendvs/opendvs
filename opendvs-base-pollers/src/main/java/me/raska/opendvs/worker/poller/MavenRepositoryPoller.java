@@ -85,6 +85,8 @@ public class MavenRepositoryPoller implements NativePoller {
     private void handlePackageMetadata(String baseUrl, PollerAction action, Consumer<PollerAction> callback) {
         PollerActionStep step = new PollerActionStep();
         step.setState(PollerActionStep.State.SUCCESS);
+        step.setPoller(getId());
+        step.setStarted(new Date());
 
         StringBuilder sb = new StringBuilder();
         sb.append("Trying to fetch component from url ");
@@ -180,6 +182,7 @@ public class MavenRepositoryPoller implements NativePoller {
             logger.warn("Cannot obtain components from url " + baseUrl, e);
         }
         step.setOutput(sb.toString());
+        step.setEnded(new Date());
         act.setSteps(Arrays.asList(step));
         callback.accept(act);
     }
@@ -243,6 +246,11 @@ public class MavenRepositoryPoller implements NativePoller {
     private boolean isLocalDir(String fragment) {
         return fragment != null && fragment.endsWith("/") && !fragment.startsWith(".")
                 && fragment.split("/").length == 1;
+    }
+
+    @Override
+    public String getId() {
+        return "maven";
     }
 
 }
