@@ -137,15 +137,31 @@ public class MavenRepositoryPoller implements NativePoller {
                 }
             }
 
-            if (latestVersion == null) {
+            if (latestVersion == null || latestVersion.isEmpty()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                            "Latest version for component " + c.getId() + " is empty, determining from version list");
+                }
+
                 Optional<ComponentVersion> v = c.getVersions().stream()
                         .max((a, b) -> a.getPublished().compareTo(b.getPublished()));
                 if (v.isPresent() && v.get().getPublished().getTime() > 0) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Determined latest version for component " + c.getId() + " with value "
+                                + v.get().getVersion() + " via published field");
+                    }
                     latestVersion = v.get().getVersion();
                 } else {
                     v = c.getVersions().stream().max((a, b) -> a.getVersion().compareTo(b.getVersion()));
                     if (v.isPresent()) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Determined latest version for component " + c.getId() + " with value "
+                                    + v.get().getVersion() + " via string comparsion");
+                        }
                         latestVersion = v.get().getVersion();
+                    } else if (logger.isDebugEnabled()) {
+                        logger.debug("Cannot determine latest version for component " + c.getId()
+                                + ", ensure this component has any versions (detected " + c.getVersions().size() + ")");
                     }
                 }
             }
