@@ -82,7 +82,8 @@ public class MavenRepositoryPoller implements NativePoller {
         return sb.toString();
     }
 
-    private void handlePackageMetadata(String baseUrl, PollerAction action, Consumer<PollerAction> callback) {
+    private void handlePackageMetadata(String baseUrl, Elements links, PollerAction action,
+            Consumer<PollerAction> callback) {
         PollerActionStep step = new PollerActionStep();
         step.setState(PollerActionStep.State.SUCCESS);
         step.setPoller(getId());
@@ -115,9 +116,14 @@ public class MavenRepositoryPoller implements NativePoller {
             sb.append(System.lineSeparator());
 
             // TODO: diffs
-            NodeList versions = (NodeList) versionsXPath.evaluate(doc, XPathConstants.NODESET);
-            for (int i = 0; i < versions.getLength(); i++) {
-                String version = versions.item(i).getTextContent();
+
+            for (Element e : links) {
+                String link = e.text();
+                if (link == null || link.isEmpty() || !link.endsWith("/") || link.startsWith(".")) {
+                    continue; // handle only folders
+                }
+
+                String version = link.substring(0, link.length() - 1);
                 ComponentVersion cv = buildComponentVersion(baseUrl, artId, version);
                 if (cv != null) {
                     cv.setId(c.getId() + ":" + cv.getVersion());
@@ -226,7 +232,7 @@ public class MavenRepositoryPoller implements NativePoller {
             /* first detect if versions should be parsed */
             for (Element e : links) {
                 if ("maven-metadata.xml".equals(e.text())) {
-                    handlePackageMetadata(url, action, callback);
+                    handlePackageMetadata(url, links, action, callback);
                     return; // don't parse anything else
                 }
             }
