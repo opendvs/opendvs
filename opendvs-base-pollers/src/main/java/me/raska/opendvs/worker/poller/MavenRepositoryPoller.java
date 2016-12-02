@@ -25,7 +25,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.NodeList;
 
 import me.raska.opendvs.base.model.Component;
 import me.raska.opendvs.base.model.ComponentVersion;
@@ -42,8 +41,7 @@ public class MavenRepositoryPoller implements NativePoller {
     private String repo = "https://repo1.maven.org/maven2/";
     private DocumentBuilder docBuilder;
     private XPathExpression artifactIdXPath;
-    private XPathExpression groupIdXPath;
-    private XPathExpression versionsXPath;
+    private XPathExpression groupIdXPath;;
     private XPathExpression latestVersionXPath;
     private XPathExpression lastUpdateXPath;
 
@@ -55,7 +53,6 @@ public class MavenRepositoryPoller implements NativePoller {
         XPath xpath = xPathfactory.newXPath();
         artifactIdXPath = xpath.compile("/metadata/artifactId/text()");
         groupIdXPath = xpath.compile("/metadata/groupId/text()");
-        versionsXPath = xpath.compile("/metadata/versioning/versions/version");
         latestVersionXPath = xpath.compile("/metadata/versioning/latest/text()");
         lastUpdateXPath = xpath.compile("/metadata/versioning/lastUpdated/text()");
     }
@@ -101,6 +98,14 @@ public class MavenRepositoryPoller implements NativePoller {
             org.w3c.dom.Document doc = docBuilder.parse(new URL(baseUrl + "maven-metadata.xml").openStream());
             String artId = (String) artifactIdXPath.evaluate(doc, XPathConstants.STRING);
             String groupId = (String) groupIdXPath.evaluate(doc, XPathConstants.STRING);
+
+            if (artId == null || groupId == null || artId.isEmpty() || groupId.isEmpty()) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Obtained invalid package metadata at url " + baseUrl);
+                }
+                return; // don't handle invalid packages
+            }
+
             String latestVersion = (String) latestVersionXPath.evaluate(doc, XPathConstants.STRING);
             String lastUpdate = (String) lastUpdateXPath.evaluate(doc, XPathConstants.STRING);
             // TODO: caching based on this + hash + lastModified field
