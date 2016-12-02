@@ -42,9 +42,14 @@ public class WorkerQueueListener {
             action.setState(State.SUCCESS);
         } catch (Exception e) {
             log.error("Failed processing PollerAction " + action.getId(), e);
+
             action.setState(State.FAILURE);
+            action.setEnded(new Date());
+            rabbitTemplate.convertAndSend(action);
+
             throw new AmqpRejectAndDontRequeueException(e);
         }
+
         action.setEnded(new Date());
         rabbitTemplate.convertAndSend(action);
     }

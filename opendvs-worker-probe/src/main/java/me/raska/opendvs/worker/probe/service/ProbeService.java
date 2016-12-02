@@ -3,7 +3,6 @@ package me.raska.opendvs.worker.probe.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,7 +39,6 @@ public class ProbeService {
         assert action != null : "action is null";
         assert action.getSteps() != null : "action steps are null";
 
-        action.setStarted(new Date());
         action.setSteps(new ArrayList<>());
         Artifact art = action.getArtifact();
 
@@ -137,7 +135,6 @@ public class ProbeService {
             action.getSteps().add(Util.generateErrorStep(e.getMessage()));
         }
 
-        action.setEnded(new Date());
         action.setState(ProbeAction.State.SUCCESS);
         // can be faster than stream since we only care about first false
         for (ProbeActionStep step : action.getSteps()) {
