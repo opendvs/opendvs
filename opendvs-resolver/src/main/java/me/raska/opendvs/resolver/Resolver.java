@@ -5,8 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 
-@ComponentScan(basePackages = { "me.raska.opendvs.resolver", "me.raska.opendvs.base.resolver.amqp", "me.raska.opendvs.base.core.amqp",
-        "me.raska.opendvs.base.bean" })
+@ComponentScan(basePackages = { "me.raska.opendvs.resolver", "me.raska.opendvs.base.resolver.amqp",
+        "me.raska.opendvs.base.poller.amqp", "me.raska.opendvs.base.core.amqp", "me.raska.opendvs.base.bean" })
 @EntityScan(basePackages = { "me.raska.opendvs.resolver", "me.raska.opendvs.base.model" })
 @SpringBootApplication
 public class Resolver {

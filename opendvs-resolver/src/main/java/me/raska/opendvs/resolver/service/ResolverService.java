@@ -1,6 +1,7 @@
 package me.raska.opendvs.resolver.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -25,10 +26,13 @@ import me.raska.opendvs.base.model.Component;
 import me.raska.opendvs.base.model.ComponentVersion;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.artifact.ArtifactComponent;
+import me.raska.opendvs.base.model.poller.PollerAction;
+import me.raska.opendvs.base.poller.amqp.PollerRabbitService;
 import me.raska.opendvs.base.resolver.ResolverAction;
 import me.raska.opendvs.resolver.dto.ArtifactComponentRepository;
 import me.raska.opendvs.resolver.dto.ArtifactRepository;
 import me.raska.opendvs.resolver.dto.ComponentRepository;
+import me.raska.opendvs.resolver.dto.PollerActionRepository;
 
 @Slf4j
 @Service
@@ -47,8 +51,15 @@ public class ResolverService {
     private ArtifactRepository artifactRepository;
 
     @Autowired
+    private PollerActionRepository pollerActionRepository;
+
+    @Autowired
     @Qualifier(CoreRabbitService.FANOUT_QUALIFIER)
     private RabbitTemplate fanoutTemplate;
+
+    @Autowired
+    @Qualifier(PollerRabbitService.WORKER_QUALIFIER)
+    private RabbitTemplate pollerExchange;
 
     @Value("${opendvs.resolver.component.page_size:10}")
     private int pageSize;
@@ -82,8 +93,18 @@ public class ResolverService {
         }
 
         List<ArtifactComponent> batchUpdate = new ArrayList<>(art.getComponents().size());
+        List<ArtifactComponent> rescanningComponents = new ArrayList<>(art.getComponents().size());
 
         for (ArtifactComponent component : art.getComponents()) {
+            if (component.getVersion() == null || component.getVersion().isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Artifact (" + artifact + ") component " + component.getName() + " in group "
+                            + component.getGroup() + " has empty version!");
+                }
+
+                continue;
+            }
+
             Component c = componentRepository.findByNameAndGroup(component.getName(), component.getGroup());
             if (c == null) {
                 if (log.isDebugEnabled()) {
@@ -91,8 +112,10 @@ public class ResolverService {
                             + component.getGroup() + " cannot be found");
                 }
 
+                rescanningComponents.add(component);
                 continue;
             }
+
             Set<String> compVersions = c.getVersions().stream().map(cv -> cv.getVersion()).collect(Collectors.toSet());
 
             if ((component.getState() != ArtifactComponent.State.UP_TO_DATE && component.getVersion() != null
@@ -104,6 +127,8 @@ public class ResolverService {
 
                 component.setState(ArtifactComponent.State.UP_TO_DATE);
                 batchUpdate.add(component);
+                rescanningComponents.add(component); // TODO: allow grace period
+                                                     // to be configured
             } else if (component.getVersion() != null && component.getState() != ArtifactComponent.State.OUTDATED
                     && compVersions.contains(component.getVersion())) {
 
@@ -116,12 +141,33 @@ public class ResolverService {
             } else if (log.isDebugEnabled()) {
                 log.debug("Artifact (" + artifact + ") component " + component.getId() + " version "
                         + component.getVersion() + " couldn't be found in known versions " + compVersions);
+                component.setState(ArtifactComponent.State.UNKNOWN);
+                rescanningComponents.add(component);
             }
         }
 
         if (!batchUpdate.isEmpty()) {
             artifactComponentRepository.save(batchUpdate);
             fanoutTemplate.convertAndSend(batchUpdate);
+        }
+
+        if (!rescanningComponents.isEmpty()) {
+            publishScanning(rescanningComponents);
+        }
+    }
+
+    private void publishScanning(List<ArtifactComponent> components) {
+        for (ArtifactComponent c : components) {
+            PollerAction action = new PollerAction();
+            action.setFilter(c.getGroup() + ":" + c.getName());
+            if (pollerActionRepository.findByFilterAndStateIn(action.getFilter(),
+                    Arrays.asList(PollerAction.State.QUEUED, PollerAction.State.IN_PROGRESS)).size() > 0) {
+                continue;
+            }
+
+            action.setInitiated(new Date());
+            action.setState(PollerAction.State.QUEUED);
+            pollerExchange.convertAndSend(pollerActionRepository.save(action));
         }
     }
 
