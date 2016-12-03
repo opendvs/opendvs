@@ -16,6 +16,12 @@ import java.util.Set;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.shared.invoker.DefaultInvocationRequest;
+import org.apache.maven.shared.invoker.DefaultInvoker;
+import org.apache.maven.shared.invoker.InvocationRequest;
+import org.apache.maven.shared.invoker.InvocationResult;
+import org.apache.maven.shared.invoker.Invoker;
+import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +36,9 @@ import me.raska.opendvs.base.util.Util;
 public class MavenProbe implements NativeProbe {
     private static final Logger logger = LoggerFactory.getLogger(MavenProbe.class);
 
+    // TODO: load from context
+    private String mavenHome = "/usr/share/maven";
+
     @Override
     public List<ProbeActionStep> extract(Artifact artifact, List<ArtifactComponent> extractedComponents,
             ProbingContext context) {
@@ -42,19 +51,46 @@ public class MavenProbe implements NativeProbe {
 
     private Model getEffectivePomModel(File pom) throws IOException, XmlPullParserException {
         MavenXpp3Reader reader = new MavenXpp3Reader();
-        Model model = reader.read(new FileReader(pom));
-        // TODO: find out how to get ModelResolver instance to build effective
-        // POM
-        return model;
+        return reader.read(new FileReader(pom));
+    }
+
+    private File generateEffectivePom(File pom) throws IOException, MavenInvocationException {
+        File effectivePom = Files.createTempFile(null, ".pom").toFile();
+        effectivePom.deleteOnExit();
+        InvocationRequest request = new DefaultInvocationRequest();
+        request.setPomFile(pom);
+        request.setGoals(Arrays.asList("help:effective-pom", "-Doutput=" + effectivePom.getAbsolutePath()));
+
+        Invoker inv = new DefaultInvoker();
+        inv.setMavenHome(new File(mavenHome));
+        inv.setOutputHandler(null);
+        inv.setErrorHandler(null);
+
+        InvocationResult res = inv.execute(request);
+        if (res.getExitCode() != 0) {
+            throw new MavenInvocationException(
+                    "Cannot build effective pom, execution returned exit code " + res.getExitCode());
+        }
+        return effectivePom;
     }
 
     private List<ArtifactComponent> getMavenComponents(File f, ArtifactComponent parentComponent)
             throws IOException, XmlPullParserException {
-        List<ArtifactComponent> components = new ArrayList<>();
+        final List<ArtifactComponent> components = new ArrayList<>();
 
-        Model model = getEffectivePomModel(f);
+        File effectivePom;
+        try {
+            effectivePom = generateEffectivePom(f);
+        } catch (IOException | MavenInvocationException e) {
+            logger.warn("Cannot build effective pom for " + f.getAbsolutePath(), e);
+            // fallback to regular pom
+            effectivePom = f;
+        }
 
-        ArtifactComponent parentc = new ArtifactComponent();
+        final Model model = getEffectivePomModel(effectivePom);
+        final boolean isEffective = f != effectivePom;
+
+        final ArtifactComponent parentc = new ArtifactComponent();
         parentc.setGroup("maven");
         parentc.setVersion(model.getVersion());
         parentc.setName(model.getGroupId() + ":" + model.getArtifactId());
@@ -69,13 +105,13 @@ public class MavenProbe implements NativeProbe {
             c.setScope((dep.getScope() == null) ? "runtime" : dep.getScope());
             c.setGroup("maven");
 
-            // replace all properties with this nasty hack
-            // TODO: find proper way how to obtain pom model with resolved
-            // variables 
             String version = dep.getVersion();
-            if (version != null) {
-                for (Entry<String, String> entry : properties.entrySet()) {
-                    version = version.replace(entry.getKey(), entry.getValue());
+            if (!isEffective) {
+                // replace all unresolved properties with this nasty hack
+                if (version != null) {
+                    for (Entry<String, String> entry : properties.entrySet()) {
+                        version = version.replace(entry.getKey(), entry.getValue());
+                    }
                 }
             }
             c.setVersion(version);
@@ -85,10 +121,14 @@ public class MavenProbe implements NativeProbe {
             components.add(c);
         }
 
+        if (isEffective) { // delete the file
+            effectivePom.delete();
+        }
         return components;
     }
 
     private Map<String, String> mapMavenProperties(Model model) {
+        // try the best to replace properties
         Map<String, String> map = new HashMap<>();
         model.getProperties().forEach((k, v) -> {
             map.put(String.format("${%s}", k), v.toString());
