@@ -60,7 +60,14 @@ public class MavenRepositoryPoller implements NativePoller {
     @Override
     public void process(PollerAction action, Consumer<PollerAction> callback) {
         if (action.getFilter() != null) {
-            detectArtifactDir(buildFilterUrl(repo, action.getFilter()), action, callback);
+            if (action.getFilter().startsWith("maven:")) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Triggering Maven poller due to filter " + action.getFilter());
+                }
+                detectArtifactDir(buildFilterUrl(repo, action.getFilter()), action, callback);
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("Filter " + action.getFilter() + " is not applicable for Maven poller");
+            }
         } else {
             detectArtifactDir(repo, action, callback);
         }
@@ -70,11 +77,15 @@ public class MavenRepositoryPoller implements NativePoller {
         String[] sp = filter.split(":");
         StringBuilder sb = new StringBuilder();
         sb.append(base);
-        sb.append(sp[0].replace(".", "/"));
-        sb.append("/");
-        if (sp.length > 1) {
-            sb.append(sp[1]);
+        sb.append(sp[1].replace(".", "/"));
+
+        if (sp.length > 2) {
             sb.append("/");
+            sb.append(sp[2]); // don't replace dots in artifactId
+            sb.append("/");
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Generated filter URL " + sb.toString() + " for filter " + filter);
         }
         return sb.toString();
     }
