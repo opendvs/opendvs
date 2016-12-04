@@ -40,6 +40,10 @@ public class PollerWorkerService {
     @Transactional
     public List<ResolverAction> process(PollerAction action) {
         PollerAction act = pollerActionRepository.findOne(action.getId());
+        if (act == null) {
+            throw new RuntimeException("Cannot find PollerAction " + action.getId() + ", ensure it's not transactional issue!");
+        }
+
         List<ResolverAction> resolverActions = new ArrayList<>();
 
         if (action.getSteps() != null && !action.getSteps().isEmpty()) {

@@ -35,6 +35,11 @@ public class PollerAction {
 
     private String filter;
 
+    /**
+     * To keep trace of resolving progress. 
+     */
+    private String artifactId;
+
     @Enumerated(EnumType.STRING)
     private State state;
 

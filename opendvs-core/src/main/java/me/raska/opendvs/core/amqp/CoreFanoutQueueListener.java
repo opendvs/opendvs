@@ -14,8 +14,8 @@ public class CoreFanoutQueueListener {
 
     @RabbitListener(queues = "#{@coreFanoutQueue}")
     public void handleInputQueue(Object obj) {
-        System.out.println(obj);
-        // TODO
+        //System.out.println(obj);
+        // TODO Websockets
     }
 
 }

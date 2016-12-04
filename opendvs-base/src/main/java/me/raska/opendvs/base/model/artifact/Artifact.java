@@ -59,6 +59,9 @@ public class Artifact {
     @Enumerated(EnumType.STRING)
     private Type type;
 
+    @Enumerated(EnumType.STRING)
+    private State state;
+
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "project_id")
@@ -76,5 +79,9 @@ public class Artifact {
 
     public static enum Type {
         build, source
+    }
+
+    public static enum State {
+        DETECTING, RESOLVING, FINISHED;
     }
 }

@@ -79,6 +79,8 @@ public class ProbeWorkerService {
         }
         act.setSteps(steps);
 
+        art.setState(Artifact.State.RESOLVING);
+        artifactRepository.save(art);
         probeActionRepository.save(act);
         artifactComponentRepository.save(components);
 

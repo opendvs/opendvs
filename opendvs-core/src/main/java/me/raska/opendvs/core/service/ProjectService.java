@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +21,7 @@ import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.project.Project;
 import me.raska.opendvs.base.model.project.ProjectType;
 import me.raska.opendvs.core.dto.ArtifactRepository;
+import me.raska.opendvs.core.dto.PollerActionRepository;
 import me.raska.opendvs.core.dto.ProjectRepository;
 import me.raska.opendvs.core.exception.InvalidRequestException;
 
@@ -31,6 +33,9 @@ public class ProjectService {
 
     @Autowired
     private ArtifactRepository artifactRepository;
+
+    @Autowired
+    private PollerActionRepository pollerActionRepository;
 
     private Map<String, ProjectTypeHandler> projectHandlers;
 
@@ -125,5 +130,20 @@ public class ProjectService {
                 projectHandlers.put(types[i], p);
             }
         });
+    }
+
+    @Scheduled(fixedRate = 60 * 1000)
+    private void resolveArtifactState() {
+        for (Artifact art : artifactRepository.findByState(Artifact.State.RESOLVING)) {
+            if (pollerActionRepository.getRunningActions(art.getId()) == 0) {
+                art.setState(Artifact.State.FINISHED);
+                artifactRepository.save(art);
+
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                            "Resolved artifact " + art.getId() + " state to FINISHED as there are no running actions");
+                }
+            }
+        }
     }
 }

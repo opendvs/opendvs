@@ -3,7 +3,10 @@ package me.raska.opendvs.resolver.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +30,6 @@ import me.raska.opendvs.base.model.ComponentVersion;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.artifact.ArtifactComponent;
 import me.raska.opendvs.base.model.poller.PollerAction;
-import me.raska.opendvs.base.poller.amqp.PollerRabbitService;
 import me.raska.opendvs.base.resolver.ResolverAction;
 import me.raska.opendvs.resolver.dto.ArtifactComponentRepository;
 import me.raska.opendvs.resolver.dto.ArtifactRepository;
@@ -57,15 +59,13 @@ public class ResolverService {
     @Qualifier(CoreRabbitService.FANOUT_QUALIFIER)
     private RabbitTemplate fanoutTemplate;
 
-    @Autowired
-    @Qualifier(PollerRabbitService.WORKER_QUALIFIER)
-    private RabbitTemplate pollerExchange;
-
     @Value("${opendvs.resolver.component.page_size:10}")
     private int pageSize;
 
-    public void handleMessage(ResolverAction action) {
+    @Transactional
+    public Map<String, List<ArtifactComponent>> handleMessage(ResolverAction action) {
         assert action != null : "Action cannot be null";
+        Map<String, List<ArtifactComponent>> rescanningComponents = new HashMap<>();
 
         if (action.getComponents() != null) {
             if (log.isDebugEnabled()) {
@@ -80,16 +80,18 @@ public class ResolverService {
                 log.debug("Obtained " + action.getArtifacts().size() + " artifacts to handle");
             }
 
-            action.getArtifacts().forEach(this::handleInputArtifact);
+            for (String a : action.getArtifacts()) {
+                rescanningComponents.put(a, handleInputArtifact(a)); // TODO
+            }
         }
+
+        return rescanningComponents;
     }
 
-    @Transactional
-    private void handleInputArtifact(String artifact) {
+    private List<ArtifactComponent> handleInputArtifact(String artifact) {
         Artifact art = artifactRepository.findOne(artifact);
         if (art == null) {
-            log.warn("Obtained non-existing artifact to resolve with id " + artifact);
-            return;
+            throw new RuntimeException("Obtained non-existing artifact to resolve with id " + artifact);
         }
 
         List<ArtifactComponent> batchUpdate = new ArrayList<>(art.getComponents().size());
@@ -151,24 +153,28 @@ public class ResolverService {
             fanoutTemplate.convertAndSend(batchUpdate);
         }
 
-        if (!rescanningComponents.isEmpty()) {
-            publishScanning(rescanningComponents);
-        }
+        return rescanningComponents;
     }
 
-    private void publishScanning(List<ArtifactComponent> components) {
-        for (ArtifactComponent c : components) {
-            PollerAction action = new PollerAction();
-            action.setFilter(c.getGroup() + ":" + c.getName());
-            if (pollerActionRepository.findByFilterAndStateIn(action.getFilter(),
-                    Arrays.asList(PollerAction.State.QUEUED, PollerAction.State.IN_PROGRESS)).size() > 0) {
-                continue;
-            }
+    @Transactional
+    public List<PollerAction> publishScanning(Map<String, List<ArtifactComponent>> components) {
+        List<PollerAction> actions = new ArrayList<>();
+        for (Entry<String, List<ArtifactComponent>> entry : components.entrySet()) {
+            for (ArtifactComponent c : entry.getValue()) {
+                PollerAction action = new PollerAction();
+                action.setFilter(c.getGroup() + ":" + c.getName());
+                if (pollerActionRepository.findByFilterAndStateIn(action.getFilter(),
+                        Arrays.asList(PollerAction.State.QUEUED, PollerAction.State.IN_PROGRESS)).size() > 0) {
+                    continue;
+                }
 
-            action.setInitiated(new Date());
-            action.setState(PollerAction.State.QUEUED);
-            pollerExchange.convertAndSend(pollerActionRepository.save(action));
+                action.setInitiated(new Date());
+                action.setState(PollerAction.State.QUEUED);
+                action.setArtifactId(entry.getKey());
+                actions.add(pollerActionRepository.save(action));
+            }
         }
+        return actions;
     }
 
     private boolean handleSemverMajor(Component c, ArtifactComponent ac, int majorOffset) {
