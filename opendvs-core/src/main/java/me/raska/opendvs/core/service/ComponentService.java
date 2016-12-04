@@ -17,4 +17,7 @@ public class ComponentService {
         return componentRepository.findAll(page);
     }
 
+    public Component getComponent(String id) {
+        return componentRepository.findOne(id);
+    }
 }
