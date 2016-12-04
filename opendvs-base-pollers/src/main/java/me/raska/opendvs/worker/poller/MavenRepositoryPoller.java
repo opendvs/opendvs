@@ -94,6 +94,7 @@ public class MavenRepositoryPoller implements NativePoller {
             Consumer<PollerAction> callback) {
         PollerActionStep step = new PollerActionStep();
         step.setState(PollerActionStep.State.SUCCESS);
+        step.setType(PollerActionStep.Type.PACKAGE);
         step.setPoller(getId());
         step.setStarted(new Date());
 
@@ -195,8 +196,6 @@ public class MavenRepositoryPoller implements NativePoller {
             set.add(c);
 
             step.setDetectedComponents(set);
-            step.setType(PollerActionStep.Type.PACKAGE);
-
         } catch (Exception e) {
             step.setState(PollerActionStep.State.FAILURE);
             sb.append("Obtained fatal exception " + e.getMessage());
