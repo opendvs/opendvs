@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -26,7 +24,6 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import me.raska.opendvs.base.core.amqp.CoreRabbitService;
 import me.raska.opendvs.base.model.Component;
-import me.raska.opendvs.base.model.ComponentVersion;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.artifact.ArtifactComponent;
 import me.raska.opendvs.base.model.poller.PollerAction;
@@ -35,14 +32,11 @@ import me.raska.opendvs.resolver.dto.ArtifactComponentRepository;
 import me.raska.opendvs.resolver.dto.ArtifactRepository;
 import me.raska.opendvs.resolver.dto.ComponentRepository;
 import me.raska.opendvs.resolver.dto.PollerActionRepository;
+import me.raska.opendvs.resolver.util.SemanticVersioningUtil;
 
 @Slf4j
 @Service
 public class ResolverService {
-    public static final Pattern SEMVER_PATTERN = Pattern.compile("^([\\d]+)\\.([\\d]+)\\.[\\d]+$");
-
-    public static final int DAY_VAL = 1000 * 60 * 24;
-
     @Autowired
     private ArtifactComponentRepository artifactComponentRepository;
 
@@ -108,44 +102,21 @@ public class ResolverService {
             }
 
             Component c = componentRepository.findByNameAndGroup(component.getName(), component.getGroup());
-            if (c == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Artifact (" + artifact + ") component " + component.getName() + " in group "
-                            + component.getGroup() + " cannot be found");
-                }
+            ArtifactComponent.State state = SemanticVersioningUtil.checkVersion(component.getVersion(), c,
+                    art.getProject().getMajorVersionOffset());
 
-                rescanningComponents.add(component);
-                continue;
+            if (log.isDebugEnabled()) {
+                log.debug("Artifact (" + artifact + ") component " + component.getId() + " is " + state);
             }
 
-            Set<String> compVersions = c.getVersions().stream().map(cv -> cv.getVersion()).collect(Collectors.toSet());
-
-            SemverState semver = handleSemver(c, component, art.getProject().getMajorVersionOffset());
-
-            if (semver == SemverState.OK || (component.getState() != ArtifactComponent.State.UP_TO_DATE
-                    && component.getVersion() != null && component.getVersion().equals(c.getLatestVersion()))) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Artifact (" + artifact + ") component " + component.getId() + " is up to date");
-                }
-
-                component.setState(ArtifactComponent.State.UP_TO_DATE);
+            component.setState(state);
+            if (state == ArtifactComponent.State.UP_TO_DATE) {
                 batchUpdate.add(component);
                 rescanningComponents.add(component); // TODO: allow grace period
                                                      // to be configured
-            } else if (semver == SemverState.NOK
-                    || component.getVersion() != null && component.getState() != ArtifactComponent.State.OUTDATED
-                            && compVersions.contains(component.getVersion())) {
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Artifact (" + artifact + ") component " + component.getId() + " is outdated");
-                }
-
-                component.setState(ArtifactComponent.State.OUTDATED);
+            } else if (state == ArtifactComponent.State.OUTDATED) {
                 batchUpdate.add(component);
-            } else if (log.isDebugEnabled()) {
-                log.debug("Artifact (" + artifact + ") component " + component.getId() + " version "
-                        + component.getVersion() + " couldn't be found in known versions " + compVersions);
-                component.setState(ArtifactComponent.State.UNKNOWN);
+            } else {
                 rescanningComponents.add(component);
             }
         }
@@ -177,56 +148,6 @@ public class ResolverService {
             }
         }
         return actions;
-    }
-
-    private SemverState handleSemver(Component c, ArtifactComponent ac, int majorOffset) {
-        if (ac.getVersion().equals("*")) {
-            return SemverState.OK;
-        }
-
-        Boolean fixMajor = null; // fix for major version
-        String version = ac.getVersion();
-
-        if (ac.getVersion().startsWith("^") || ac.getVersion().startsWith("~")) { // strip
-                                                                                  // special
-                                                                                  // handling
-            version = ac.getVersion().substring(1);
-            fixMajor = ac.getVersion().startsWith("^");
-        }
-
-        Matcher m = SEMVER_PATTERN.matcher(version);
-        if (m.matches()) {
-            int major = Integer.parseInt(m.group(1));
-            int minor = Integer.parseInt(m.group(2));
-
-            String versionStr;
-            if (fixMajor == null || fixMajor) {
-                versionStr = major + ".";
-            } else {
-                versionStr = major + "." + minor + ".";
-            }
-
-            if (fixMajor == null && majorOffset > 0 && c.getLatestVersion() != null
-                    && !c.getLatestVersion().startsWith(versionStr)) {
-                // find those who start with the same major version and filter
-                // unrelevant ones
-                ComponentVersion cv = c.getVersions().stream().filter(v -> v.getVersion().startsWith(versionStr))
-                        .filter(v -> v.getPublished() != null && SEMVER_PATTERN.matcher(v.getVersion()).matches())
-                        .sorted((v1, v2) -> v2.getPublished().compareTo(v1.getPublished())).findFirst().orElse(null);
-                if (cv != null && cv.getPublished() != null
-                        && new Date(System.currentTimeMillis() - DAY_VAL * majorOffset).before(cv.getPublished())) {
-                    return SemverState.OK;
-                }
-            } else if (fixMajor != null) {
-                // match against latest version
-                if (c.getLatestVersion().startsWith(versionStr)) {
-                    return SemverState.OK;
-                }
-                return SemverState.NOK;
-            }
-        }
-
-        return SemverState.NOT_SEMVER;
     }
 
     private void handleInputComponent(String component) {
@@ -297,9 +218,5 @@ public class ResolverService {
         }
 
         return acomps.nextPageable();
-    }
-
-    private enum SemverState {
-        OK, NOK, NOT_SEMVER;
     }
 }
