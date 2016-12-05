@@ -184,7 +184,7 @@ public class ResolverService {
             return SemverState.OK;
         }
 
-        boolean fixMajor = true; // fix for major version
+        Boolean fixMajor = null; // fix for major version
         String version = ac.getVersion();
 
         if (ac.getVersion().startsWith("^") || ac.getVersion().startsWith("~")) { // strip
@@ -194,25 +194,20 @@ public class ResolverService {
             fixMajor = ac.getVersion().startsWith("^");
         }
 
-        System.out.println("Trying to detect semver for artifactComponent " + ac.getUid() + ", version - " + version
-                + ", fixMajor - " + fixMajor);
-
         Matcher m = SEMVER_PATTERN.matcher(version);
         if (m.matches()) {
-            System.out.println("Semver matched!");
-            System.out.println(m.group(1));
             int major = Integer.parseInt(m.group(1));
             int minor = Integer.parseInt(m.group(2));
 
             String versionStr;
-            if (fixMajor) {
+            if (fixMajor == null || fixMajor) {
                 versionStr = major + ".";
             } else {
                 versionStr = major + "." + minor + ".";
             }
 
-            System.out.println("Finding versionstr " + versionStr);
-            if (majorOffset > 0 && c.getLatestVersion() != null && !c.getLatestVersion().startsWith(versionStr)) {
+            if (fixMajor == null && majorOffset > 0 && c.getLatestVersion() != null
+                    && !c.getLatestVersion().startsWith(versionStr)) {
                 // find those who start with the same major version and filter
                 // unrelevant ones
                 ComponentVersion cv = c.getVersions().stream().filter(v -> v.getVersion().startsWith(versionStr))
@@ -222,8 +217,8 @@ public class ResolverService {
                         && new Date(System.currentTimeMillis() - DAY_VAL * majorOffset).before(cv.getPublished())) {
                     return SemverState.OK;
                 }
-            } else {
-                // match agains latest version
+            } else if (fixMajor != null) {
+                // match against latest version
                 if (c.getLatestVersion().startsWith(versionStr)) {
                     return SemverState.OK;
                 }
