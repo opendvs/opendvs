@@ -108,7 +108,9 @@ public class NpmRepositoryPoller implements NativePoller {
     }
 
     private void detectArtifactDir(String url, PollerAction action, Consumer<PollerAction> callback) {
-        // TODO: find out way how to detect all URLs
+        // TODO: Load artifact data from http://registry.npmjs.org/-/all , it
+        // sadly doesn't contain list of all versions and its update dates, so
+        // another request for each artifact is necessary
     }
 
     @Override
