@@ -1,6 +1,5 @@
 package me.raska.opendvs.worker.poller.npm;
 
-import java.util.Date;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,6 +15,6 @@ public class NpmArtifactMetadata {
 
     private Map<String, NpmArtifactVersion> versions;
 
-    private Map<String, Date> time;
+    private Map<String, Object> time;
 
 }
