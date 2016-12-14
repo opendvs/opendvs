@@ -16,6 +16,16 @@ public class SemanticVersioningUtil {
     public static final int DAY_VAL = 1000 * 60 * 24;
     public static final Pattern SEMVER_PATTERN = Pattern.compile("^([\\d]+)\\.([\\d]+)\\.([\\d]+)$");
 
+    public static ComponentVersion getLatestSemanticVersion(Component c, String prefix) {
+        if (prefix == null) {
+            return null;
+        }
+
+        return c.getVersions().stream().filter(v -> v.getVersion().startsWith(prefix))
+                .filter(v -> v.getPublished() != null && SEMVER_PATTERN.matcher(v.getVersion()).matches())
+                .sorted((v1, v2) -> v2.getPublished().compareTo(v1.getPublished())).findFirst().orElse(null);
+    }
+
     public static State checkVersion(String version, Component c, int majorOffset) {
         if (c == null || version == null) {
             return State.UNKNOWN;
@@ -37,19 +47,25 @@ public class SemanticVersioningUtil {
                 return State.UP_TO_DATE;
             }
 
-            String prefix = buildSemverPrefix(entry); // ^1.2.3 == 1.2.3 ==
-                                                      // 1.*.*
+            String prefix = buildSemverPrefix(entry); // ^1.2.3 == 1.*.*
 
             // check if it's latest major
-            if (entry.getModifier() != null && c.getLatestVersion().startsWith(prefix)) {
-                return State.UP_TO_DATE;
+            if (c.getLatestVersion().startsWith(prefix)) {
+                if (entry.getModifier() != null) { // ~ or ^, as it will always
+                                                   // look for newest version
+                    return State.UP_TO_DATE;
+                } else if (compVersions.contains(version)) {
+                    return State.OUTDATED;
+                } else {
+                    return State.UNKNOWN;
+                }
             }
 
-            ComponentVersion cv = c.getVersions().stream().filter(v -> v.getVersion().startsWith(prefix))
-                    .filter(v -> v.getPublished() != null && SEMVER_PATTERN.matcher(v.getVersion()).matches())
-                    .sorted((v1, v2) -> v2.getPublished().compareTo(v1.getPublished())).findFirst().orElse(null);
-            if (cv != null && !cv.getVersion().equals(c.getLatestVersion())
-                    && new Date(System.currentTimeMillis() - DAY_VAL * majorOffset).before(cv.getPublished())) {
+            ComponentVersion latest = getLatestSemanticVersion(c, prefix);
+
+            if (latest != null
+                    && new Date(System.currentTimeMillis() - DAY_VAL * majorOffset).before(latest.getPublished())
+                    && (entry.getModifier() != null || version.equals(latest.getVersion()))) {
                 return State.UP_TO_DATE;
             } else if (compVersions.contains(entry.toCanonicalForm())) {
                 return State.OUTDATED;
@@ -61,7 +77,7 @@ public class SemanticVersioningUtil {
     }
 
     public static String buildSemverPrefix(SemverEntry entry) {
-        if (entry.getModifier() == null || entry.getModifier().equals('^')) {
+        if (entry.getModifier() != null && entry.getModifier().equals('^')) {
             return entry.getMajor() + ".";
         } else {
             return entry.getMajor() + "." + entry.getMinor() + ".";

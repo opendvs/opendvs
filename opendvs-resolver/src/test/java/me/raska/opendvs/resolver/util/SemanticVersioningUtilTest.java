@@ -45,8 +45,20 @@ public class SemanticVersioningUtilTest {
     }
 
     @Test
+    public void testLatestVersionHandler() {
+        Assert.assertEquals("1.2.3", SemanticVersioningUtil.getLatestSemanticVersion(c1, "1.2.").getVersion());
+        Assert.assertEquals("1.2.3", SemanticVersioningUtil.getLatestSemanticVersion(c1, "1.").getVersion());
+        Assert.assertEquals("0.9.9", SemanticVersioningUtil.getLatestSemanticVersion(c1, "0.").getVersion());
+        Assert.assertEquals("1.1.2", SemanticVersioningUtil.getLatestSemanticVersion(c1, "1.1.").getVersion());
+        Assert.assertEquals("1.0.1", SemanticVersioningUtil.getLatestSemanticVersion(c1, "1.0.").getVersion());
+        Assert.assertEquals("0.9.9", SemanticVersioningUtil.getLatestSemanticVersion(c1, "0.9.").getVersion());
+        Assert.assertNull(SemanticVersioningUtil.getLatestSemanticVersion(c1, "1.3."));
+        Assert.assertNull(SemanticVersioningUtil.getLatestSemanticVersion(c1, null));
+    }
+
+    @Test
     public void testEntryPrefixGeneration() {
-        Assert.assertEquals(SemanticVersioningUtil.buildSemverPrefix(new SemverEntry(1, 2, 3)), "1.");
+        Assert.assertEquals(SemanticVersioningUtil.buildSemverPrefix(new SemverEntry(1, 2, 3)), "1.2.");
         Assert.assertEquals(SemanticVersioningUtil.buildSemverPrefix(new SemverEntry(1, 2, 3, '~')), "1.2.");
         Assert.assertEquals(SemanticVersioningUtil.buildSemverPrefix(new SemverEntry(1, 2, 3, '^')), "1.");
     }
@@ -79,7 +91,7 @@ public class SemanticVersioningUtilTest {
         Assert.assertEquals(SemanticVersioningUtil.checkVersion("^1.2.0", c1, 0), State.UP_TO_DATE);
         Assert.assertEquals(SemanticVersioningUtil.checkVersion("1.2.1", c1, 30), State.OUTDATED);
         Assert.assertEquals(SemanticVersioningUtil.checkVersion("1.1.1", c1, 30), State.OUTDATED);
-        Assert.assertEquals(SemanticVersioningUtil.checkVersion("1.1.2", c1, 30), State.OUTDATED);
+        Assert.assertEquals(SemanticVersioningUtil.checkVersion("1.1.2", c1, 30), State.UP_TO_DATE);
         Assert.assertEquals(SemanticVersioningUtil.checkVersion("1.1.2", c1, 10), State.OUTDATED);
         Assert.assertEquals(SemanticVersioningUtil.checkVersion("^1.1.1", c1, 30), State.UP_TO_DATE);
         Assert.assertEquals(SemanticVersioningUtil.checkVersion("^0.9.8", c1, 30), State.UP_TO_DATE);
