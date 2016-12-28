@@ -1,0 +1,40 @@
+{
+  "name": "opendvs-react-ui",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "author": "Lukas Raska",
+  "license": "TBA",
+  "scripts": {
+    "start": "webpack-dev-server --config webpack-dev-server.config.js --progress --inline --colors",
+    "build": "webpack --config webpack-production.config.js --progress --colors"
+  },
+  "devDependencies": {
+    "babel-core": "*",
+    "babel-loader": "*",
+    "babel-preset-es2015": "*",
+    "babel-preset-react": "*",
+    "babel-preset-stage-2": "*",
+    "html-webpack-plugin": "*",
+    "react-hot-loader": "*",
+    "style-loader": "*",
+    "css-loader": "*",
+    "transfer-webpack-plugin": "*",
+    "webpack": "*",
+    "webpack-dev-server": "*"
+  },
+  "dependencies": {
+    "react": "*",
+    "react-dom": "*",
+    "react-router": "*",
+    "recharts": "*",
+    "material-ui": "*",
+    "material-ui-number-input": "*",
+    "react-material-icons": "*",
+    "react-tap-event-plugin": "*",
+    "jsog": "^1.0.2",
+    "react-flexbox-grid": "*",
+    "babel-polyfill": "*",
+    "flexboxgrid": "*"
+  }
+}

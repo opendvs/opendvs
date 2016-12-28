@@ -1,0 +1,20 @@
+html {
+  font-family: 'Roboto', sans-serif;
+}
+
+a {
+	text-decoration: none;
+}
+
+body {
+  font-size: 13px;
+  line-height: 20px;
+  margin: 0;
+}
+.container {
+	margin: 20px 25px 10px;
+}
+
+.dialog-root {
+  padding-top: 0 !important;
+}
