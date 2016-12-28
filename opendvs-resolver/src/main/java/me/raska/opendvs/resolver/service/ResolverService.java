@@ -237,7 +237,7 @@ public class ResolverService {
         });
         Artifact art = artifact.toBuilder().components(null).probeAction(null).project(null).build();
         Project prj = project.toBuilder().artifacts(null).typeProperties(null).build(); 
-        fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(clonedComponents, art, prj));
+        fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(art, prj));
     }
 
 }

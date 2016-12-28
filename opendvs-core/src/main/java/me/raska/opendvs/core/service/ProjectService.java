@@ -150,9 +150,9 @@ public class ProjectService {
 
                 // create shallow copy to avoid sending unnecessary data
                 Artifact art = savedArtifact.toBuilder().components(null).probeAction(null).project(null).build();
-                Project prj = savedArtifact.getProject().toBuilder().artifacts(null).typeProperties(null).build(); 
+                Project prj = savedArtifact.getProject().toBuilder().artifacts(null).typeProperties(null).build();
 
-                fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(null, art, prj));
+                fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(art, prj));
 
                 if (log.isDebugEnabled()) {
                     log.debug(
