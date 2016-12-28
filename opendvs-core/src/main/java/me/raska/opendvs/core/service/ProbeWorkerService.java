@@ -42,6 +42,9 @@ public class ProbeWorkerService {
     @Qualifier(ResolverRabbitService.RESOLVER_QUALIFIER)
     private RabbitTemplate resolverTemplate;
 
+    @Autowired
+    private WebSocketService websocketService;
+
     @Transactional
     public ResolverAction process(ProbeAction action) {
 
@@ -79,7 +82,8 @@ public class ProbeWorkerService {
         act.setSteps(steps);
 
         art.setState(Artifact.State.RESOLVING);
-        artifactRepository.save(art);
+        Artifact artifact = artifactRepository.save(art);
+        // TODO: strip and send to fanout
         probeActionRepository.save(act);
         artifactComponentRepository.save(components);
 
@@ -89,6 +93,6 @@ public class ProbeWorkerService {
         set.add(art.getId());
         resact.setArtifacts(set);
         return resact; // jump out of transactional context
-
     }
+
 }

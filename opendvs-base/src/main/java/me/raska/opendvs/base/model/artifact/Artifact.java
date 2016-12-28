@@ -24,14 +24,21 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.raska.opendvs.base.model.probe.ProbeAction;
 import me.raska.opendvs.base.model.project.Project;
 
+// TODO: get rid of no/all/builder
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 @JsonIdentityInfo(generator = JSOGGenerator.class)
 @Table(name = "ARTIFACT", uniqueConstraints = { @UniqueConstraint(columnNames = { "project_id", "identity" }) })
 public class Artifact {

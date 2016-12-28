@@ -7,16 +7,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
 import me.raska.opendvs.base.core.ProjectTypeHandler;
+import me.raska.opendvs.base.core.amqp.CoreRabbitService;
+import me.raska.opendvs.base.core.event.ArtifactUpdateEvent;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.project.Project;
 import me.raska.opendvs.base.model.project.ProjectType;
@@ -36,6 +41,10 @@ public class ProjectService {
 
     @Autowired
     private PollerActionRepository pollerActionRepository;
+
+    @Autowired
+    @Qualifier(CoreRabbitService.FANOUT_QUALIFIER)
+    private RabbitTemplate fanoutTemplate;
 
     private Map<String, ProjectTypeHandler> projectHandlers;
 
@@ -132,12 +141,18 @@ public class ProjectService {
         });
     }
 
-    @Scheduled(fixedRate = 60 * 1000)
-    private void resolveArtifactState() {
-        for (Artifact art : artifactRepository.findByState(Artifact.State.RESOLVING)) {
-            if (pollerActionRepository.getRunningActions(art.getId()) == 0) {
-                art.setState(Artifact.State.FINISHED);
-                artifactRepository.save(art);
+    @Transactional
+    public void resolveArtifactsState() {
+        for (Artifact artifact : artifactRepository.findByState(Artifact.State.RESOLVING)) {
+            if (pollerActionRepository.getRunningActions(artifact.getId()) == 0) {
+                artifact.setState(Artifact.State.FINISHED);
+                Artifact savedArtifact = artifactRepository.save(artifact);
+
+                // create shallow copy to avoid sending unnecessary data
+                Artifact art = savedArtifact.toBuilder().components(null).probeAction(null).project(null).build();
+                Project prj = savedArtifact.getProject().toBuilder().artifacts(null).typeProperties(null).build(); 
+
+                fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(null, art, prj));
 
                 if (log.isDebugEnabled()) {
                     log.debug(

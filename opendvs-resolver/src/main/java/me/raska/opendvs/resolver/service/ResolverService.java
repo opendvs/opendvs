@@ -23,10 +23,12 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import me.raska.opendvs.base.core.amqp.CoreRabbitService;
+import me.raska.opendvs.base.core.event.ArtifactUpdateEvent;
 import me.raska.opendvs.base.model.Component;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.artifact.ArtifactComponent;
 import me.raska.opendvs.base.model.poller.PollerAction;
+import me.raska.opendvs.base.model.project.Project;
 import me.raska.opendvs.base.resolver.ResolverAction;
 import me.raska.opendvs.resolver.dto.ArtifactComponentRepository;
 import me.raska.opendvs.resolver.dto.ArtifactRepository;
@@ -75,7 +77,7 @@ public class ResolverService {
             }
 
             for (String a : action.getArtifacts()) {
-                rescanningComponents.put(a, handleInputArtifact(a)); // TODO
+                rescanningComponents.put(a, handleInputArtifact(a));
             }
         }
 
@@ -123,7 +125,7 @@ public class ResolverService {
 
         if (!batchUpdate.isEmpty()) {
             artifactComponentRepository.save(batchUpdate);
-            fanoutTemplate.convertAndSend(batchUpdate);
+            notifyCore(batchUpdate, art, art.getProject());
         }
 
         return rescanningComponents;
@@ -214,9 +216,28 @@ public class ResolverService {
         // update
         if (!batchUpdate.isEmpty()) {
             artifactComponentRepository.save(batchUpdate);
-            fanoutTemplate.convertAndSend(batchUpdate);
+            notifyCore(batchUpdate);
         }
 
         return acomps.nextPageable();
     }
+
+    private void notifyCore(List<ArtifactComponent> components) {
+        components.stream().collect(Collectors.groupingBy(ArtifactComponent::getArtifact)).forEach((k, v) -> {
+            notifyCore(v, k, k.getProject());
+        });
+    }
+
+    private void notifyCore(List<ArtifactComponent> components, Artifact artifact, Project project) {
+        // don't send unneccessary stuff - requires shallow copy
+        List<ArtifactComponent> clonedComponents = new ArrayList<>(components.size());
+        components.forEach(c -> {
+            ArtifactComponent nc = c.toBuilder().probeActionStep(null).artifact(null).build();
+            clonedComponents.add(nc);
+        });
+        Artifact art = artifact.toBuilder().components(null).probeAction(null).project(null).build();
+        Project prj = project.toBuilder().artifacts(null).typeProperties(null).build(); 
+        fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(clonedComponents, art, prj));
+    }
+
 }

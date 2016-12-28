@@ -73,7 +73,7 @@ public class MavenRepositoryPoller implements NativePoller {
         }
     }
 
-    private String buildFilterUrl(String base, String filter) {
+    String buildFilterUrl(String base, String filter) {
         String[] sp = filter.split(":");
         StringBuilder sb = new StringBuilder();
         sb.append(base);

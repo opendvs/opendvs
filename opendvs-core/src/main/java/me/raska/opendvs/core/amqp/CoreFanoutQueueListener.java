@@ -1,7 +1,11 @@
 package me.raska.opendvs.core.amqp;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import me.raska.opendvs.base.core.FanoutEvent;
+import me.raska.opendvs.core.service.WebSocketService;
 
 /**
  * Listener used for obtaining events from other services.
@@ -12,10 +16,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class CoreFanoutQueueListener {
 
+    @Autowired
+    private WebSocketService websocketService;
+
     @RabbitListener(queues = "#{@coreFanoutQueue}")
-    public void handleInputQueue(Object obj) {
-        //System.out.println(obj);
-        // TODO Websockets
+    public void handleInputQueue(FanoutEvent evt) {
+        websocketService.publishEvent(evt);
     }
 
 }
