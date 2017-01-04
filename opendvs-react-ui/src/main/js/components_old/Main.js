@@ -1,8 +1,16 @@
+/**
+ * In this file, we create a React component
+ * which incorporates components provided by Material-UI.
+ */
 import React, {Component} from 'react';
 import { Router, Route, hashHistory } from 'react-router'
+import RaisedButton from 'material-ui/RaisedButton';
+import Dialog from 'material-ui/Dialog';
 import {cyan500} from 'material-ui/styles/colors';
+import {GridList, GridTile} from 'material-ui/GridList';
 import AppBar from 'material-ui/AppBar';
 import { Link } from 'react-router'
+import FlatButton from 'material-ui/FlatButton';
 import IconButton from 'material-ui/IconButton';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import ArrowDropRight from 'material-ui/svg-icons/navigation-arrow-drop-right';
@@ -10,8 +18,9 @@ import MenuItem from 'material-ui/MenuItem';
 import Drawer from 'material-ui/Drawer';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import ProjectListContainer from '../containers/ProjectListContainer'
-import SnackbarContainer from '../containers/SnackbarContainer'
+import { ProjectList, ProjectDetail } from './Project'
+import {ComponentList, PollerList} from './Component'
+import {PollerActionStepList} from './PollerAction'
 
 
 const muiTheme = getMuiTheme({
@@ -66,9 +75,8 @@ class MainWrapper extends Component {
 				      </Drawer>
 
 					      	<div className="container">
-					      		{this.props.content || <ProjectListContainer />}				     
+					      		{this.props.content || <ProjectList />}				     
 					        </div>
-					        <SnackbarContainer />
 				     </div>
 			      </MuiThemeProvider>
 			)
@@ -83,7 +91,11 @@ class Main extends Component {
 	  return (
 	  <Router history={hashHistory}>
 	  	<Route path="/" component={MainWrapper}>
-  		<Route path="projects" components={{content: ProjectListContainer}}/>
+  		<Route path="projects" components={{content: ProjectList}}/>
+  		<Route path="components" components={{content: ComponentList}}/>
+  		<Route path="components/actions" components={{content: PollerList}}/>
+  		<Route path="components/action/:action" components={{content: PollerActionStepList}}/>
+	  	<Route path="project/:projectId/details" components={{content: ProjectDetail}}/>" +
         </Route>
       </Router>
     )
