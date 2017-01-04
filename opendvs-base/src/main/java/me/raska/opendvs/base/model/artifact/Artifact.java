@@ -24,10 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.raska.opendvs.base.model.probe.ProbeAction;
 import me.raska.opendvs.base.model.project.Project;
@@ -36,9 +33,6 @@ import me.raska.opendvs.base.model.project.Project;
 @Getter
 @Setter
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder(toBuilder = true)
 @JsonIdentityInfo(generator = JSOGGenerator.class)
 @Table(name = "ARTIFACT", uniqueConstraints = { @UniqueConstraint(columnNames = { "project_id", "identity" }) })
 public class Artifact {
@@ -83,6 +77,20 @@ public class Artifact {
     private Set<ArtifactComponent> components;
 
     private Date initiated;
+
+    public Artifact clone() {
+        Artifact a = new Artifact();
+        a.id = this.id;
+        a.uri = this.uri;
+        a.name = this.name;
+        a.identity = this.identity;
+        a.sourceType = this.sourceType;
+        a.type = this.type;
+        a.state = this.state;
+        a.initiated = this.initiated;
+
+        return a;
+    }
 
     public static enum Type {
         build, source

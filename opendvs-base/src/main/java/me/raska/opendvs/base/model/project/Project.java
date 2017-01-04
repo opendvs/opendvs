@@ -18,19 +18,12 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.raska.opendvs.base.model.artifact.Artifact;
 
-//TODO: get rid of no/all/builder
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder(toBuilder = true)
 @Entity
 @JsonIdentityInfo(generator = JSOGGenerator.class)
 public class Project {
@@ -58,4 +51,14 @@ public class Project {
 
     @ElementCollection
     private Map<String, String> typeProperties;
+
+    public Project clone() {
+        Project p = new Project();
+        p.id = this.id;
+        p.name = this.name;
+        p.type = this.type;
+        p.majorVersionOffset = this.majorVersionOffset;
+
+        return p;
+    }
 }

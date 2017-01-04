@@ -149,8 +149,8 @@ public class ProjectService {
                 Artifact savedArtifact = artifactRepository.save(artifact);
 
                 // create shallow copy to avoid sending unnecessary data
-                Artifact art = savedArtifact.toBuilder().components(null).probeAction(null).project(null).build();
-                Project prj = savedArtifact.getProject().toBuilder().artifacts(null).typeProperties(null).build();
+                Artifact art = savedArtifact.clone();
+                Project prj = savedArtifact.getProject().clone();
 
                 fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(art, prj));
 
