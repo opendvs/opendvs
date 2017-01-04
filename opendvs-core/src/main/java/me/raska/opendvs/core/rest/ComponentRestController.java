@@ -20,7 +20,7 @@ public class ComponentRestController {
     @Autowired
     private ComponentService componentService;
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public Page<Component> getComponents(Pageable pageable) {
         return componentService.getComponents(pageable);
     }
