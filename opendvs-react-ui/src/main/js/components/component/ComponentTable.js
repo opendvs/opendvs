@@ -1,19 +1,18 @@
 import React, {Component} from 'react';
 import {Table, TableFooter, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
-import ProjectRow from './ProjectRow'
+import ComponentRow from './ComponentRow'
 import ChevronLeft from 'material-ui/svg-icons/navigation/chevron-left'
 import ChevronRight from 'material-ui/svg-icons/navigation/chevron-right'
 import IconButton from 'material-ui/IconButton'
-import FlatButton from 'material-ui/FlatButton';
+import FlatButton from 'material-ui/FlatButton'
 import {PAGINATION_OFFSET} from '../../config'
 
-const ProjectTable = ({ projects, page, onPageChange }) => {
-    var rows = [];
-
-    projects.forEach((project) => {
-      rows.push(<ProjectRow project={project} key={project.id} />);
-    });
-
+const ComponentTable = ({ components, page, onPageChange, onComponentSelect }) => {
+	 var rows = [];
+     components.forEach((art) => {
+	      rows.push(<ComponentRow component={art} key={art.id} onComponentSelect={() => onComponentSelect(art)} />);
+     });
+	
       var pageButtons = [];
 
       var start = page.current - PAGINATION_OFFSET;
@@ -36,14 +35,17 @@ const ProjectTable = ({ projects, page, onPageChange }) => {
       }
 
     return (
-        <Table selectable={false}>
+		 <Table>
           <TableHeader adjustForCheckbox={false} displaySelectAll={false}>
             <TableRow>
               <TableHeaderColumn>Name</TableHeaderColumn>
-              <TableHeaderColumn>Type</TableHeaderColumn>
+              <TableHeaderColumn>Latest Version</TableHeaderColumn>
+              <TableHeaderColumn>Group</TableHeaderColumn>
+              <TableHeaderColumn>Versions</TableHeaderColumn>
             </TableRow>
           </TableHeader>
           <TableBody>{rows}</TableBody>
+
           <TableFooter>
 	          <TableRow> 
 	          	<TableRowColumn style={{paddingTop: 20, textAlign: "center"}}>
@@ -61,4 +63,4 @@ const ProjectTable = ({ projects, page, onPageChange }) => {
     )
 }
 
-export default ProjectTable
+export default ComponentTable

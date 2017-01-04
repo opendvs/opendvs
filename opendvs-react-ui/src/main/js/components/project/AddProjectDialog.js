@@ -56,6 +56,7 @@ class AddProjectDialog extends Component {
 				<Dialog
 			      open={opened}
 			      title="Create new project"
+				  autoScrollBodyContent={true}
 			      actions={standardActions}
 			      onRequestClose={() => dispatch(toggleProjectDialog(false))}>
 				      <TextField 

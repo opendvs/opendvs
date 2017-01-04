@@ -11,6 +11,7 @@ import Drawer from 'material-ui/Drawer';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import ProjectListContainer from '../containers/ProjectListContainer'
+import ComponentListContainer from '../containers/ComponentListContainer'
 import SnackbarContainer from '../containers/SnackbarContainer'
 
 
@@ -84,6 +85,7 @@ class Main extends Component {
 	  <Router history={hashHistory}>
 	  	<Route path="/" component={MainWrapper}>
   		<Route path="projects" components={{content: ProjectListContainer}}/>
+  		<Route path="components" components={{content: ComponentListContainer}}/>
         </Route>
       </Router>
     )

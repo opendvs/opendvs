@@ -25,7 +25,7 @@ class ProjectList extends Component {
 	    this.props.dispatch(selectPage(newPage))
 	  }
 	render() {
-		 const { projects } = this.props
+		 const { items, page } = this.props
 		 
 		 return (
 		 <Grid style={gridStyle}>
@@ -38,7 +38,7 @@ class ProjectList extends Component {
 				</Col>
 		    </Row>
 		    <Row>
-		      <ProjectTable projects={projects.items} page={projects.page} onPageChange={this.handleClick} />
+		      <ProjectTable projects={items} page={page} onPageChange={this.handleClick} />
 		    </Row>
 		  </Grid>
 		)

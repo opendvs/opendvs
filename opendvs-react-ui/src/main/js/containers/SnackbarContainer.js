@@ -13,17 +13,7 @@ const SnackbarComponent = ({ message, open, dispatch }) => (
  )
 
 const mapStateToProps = state => {
-  const { snackbar } = state
-
-  const {
-    open,
-    message
-  } = snackbar;
-
-  return {
-    open,
-    message
-  }
+	return state.snackbar
 }
 
 const SnackbarContainer = connect(
