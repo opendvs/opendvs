@@ -204,6 +204,9 @@ export const selectArtifact = (projectId, artId) => (dispatch) => {
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
+    	// TODO: move to separate field to be able to draw component graph in the future
+    	data.components = removeDuplicateUIDs(data.components);
+    	data.components.sort((a,b) => a.name.localeCompare(b.name));
     	dispatch(receiveArtifact(data));
 		dispatch(pageComponents());
     });
@@ -246,3 +249,27 @@ export const receivePagedComponents = (components) => ({
 	type: PAGE_COMPONENTS,
 	components: components
 })
+
+
+
+const removeDuplicateUIDs = (components) => {
+	  var keys = {};
+	  var newarr = [];
+	  for (var i in components) {
+		  var obj = components[i];
+		  var k = obj.group + "|" + obj.name + "|" + obj.version;
+		  if (!(k in keys)) {
+			  keys[k] = [];
+		  }
+
+		  keys[k].push(obj);
+	  }
+
+	  for (var k in keys) {
+		  var e = keys[k][0];
+		  e.occurrences = keys[k].length;
+		  newarr.push(e);
+	  }
+
+	  return newarr;
+  }
