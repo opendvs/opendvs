@@ -1,13 +1,14 @@
 import {
   REQUEST_PROJECTS, RECEIVE_PROJECTS, SELECT_PAGE
 } from '../actions/project'
+import { PAGE_SIZE } from '../config.js'
 
 
 const projects = (state = {
 	  isFetching: false,
 	  didInvalidate: false,
 	  items: [],
-	  page: { current: 1, size: 2 },
+	  page: { current: 1, size: PAGE_SIZE },
 	  newProject: {}
 	}, action) => {
 	  switch (action.type) {

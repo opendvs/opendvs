@@ -8,10 +8,8 @@ const  gridStyle = {width: "100%"};
 
 class ProjectList extends Component {
 	componentDidMount() {
-		console.log("Props", this.props);
 	    const { dispatch, page } = this.props
 	    dispatch(fetchProjectsIfNeeded(page))
-	    console.log("Mounted");
 	  }
 	
 	  componentWillReceiveProps(nextProps) {

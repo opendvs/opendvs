@@ -16,9 +16,46 @@ export const UPDATE_PROJECT_ADD_FORM_FIELD = 'UPDATE_PROJECT_ADD_FORM_FIELD'
 export const CREATE_PROJECT_REQUEST = 'CREATE_PROJECT_REQUEST'
 export const CREATE_PROJECT = 'CREATE_PROJECT'
 
+export const REQUEST_PROJECT = 'REQUEST_PROJECT'
+export const RECEIVE_PROJECT = 'RECEIVE_PROJECT'
+export const REQUEST_ARTIFACTS = 'REQUEST_ARTIFACTS'
+export const RECEIVE_ARTIFACTS = 'RECEIVE_ARTIFACTS'
+export const REQUEST_ARTIFACT = 'REQUEST_ARTIFACT'
+export const RECEIVE_ARTIFACT = 'RECEIVE_ARTIFACT'
+export const PAGE_COMPONENTS = 'PAGE_ARTIFACT_COMPONENTS'
+export const SELECT_COMPONENT_PAGE = 'SELECT_ARTIFACT_COMPONENT_PAGE'
+
 export const selectPage = (newPage) => ({
 	type: SELECT_PAGE,
 	newPage: newPage
+})
+
+export const requestProject = () => ({
+  type: REQUEST_PROJECT
+})
+
+export const receiveProject = (data) => ({
+  type: RECEIVE_PROJECT,
+  project: data
+})
+
+
+export const requestArtifacts = () => ({
+  type: REQUEST_ARTIFACTS
+})
+
+export const receiveArtifacts = (data) => ({
+  type: RECEIVE_ARTIFACTS,
+  artifacts: data.content
+})
+
+export const requestArtifact = () => ({
+  type: REQUEST_ARTIFACT
+})
+
+export const receiveArtifact = (data) => ({
+  type: RECEIVE_ARTIFACT,
+  artifact: data
 })
 
 export const requestProjects = () => ({
@@ -145,3 +182,67 @@ export const createNewProject = (project) => (dispatch, state) => {
     	dispatch(toggleSnackbar(true, `Project ${proj.name} successfully created`));
 	})
 }
+
+
+
+
+
+export const fetchProject = (id) => (dispatch) => {
+  dispatch(requestProject())
+  return fetch(`${API_URL}/project/${id}`)
+    .then(result=>result.json())
+    .then(items=> {
+    	var data = JSOG.decode(items);
+    	dispatch(receiveProject(data));
+    	dispatch(fetchArtifacts(id));
+    });
+}
+
+export const selectArtifact = (projectId, artId) => (dispatch) => {
+  dispatch(requestArtifact())
+  return fetch(`${API_URL}/project/${projectId}/artifact/${artId}`)
+    .then(result=>result.json())
+    .then(items=> {
+    	var data = JSOG.decode(items);
+    	dispatch(receiveArtifact(data));
+		dispatch(pageComponents());
+    });
+}
+
+
+
+const fetchArtifacts = (id) => (dispatch) => {
+  dispatch(requestArtifacts())
+  return fetch(`${API_URL}/project/${id}/artifacts`)
+    .then(result=>result.json())
+    .then(items=> {
+    	var data = JSOG.decode(items);
+    	dispatch(receiveArtifacts(data));
+    	if (data.content.length > 0) {
+    		dispatch(selectArtifact(id, data.content[0].id));
+    	}
+    });
+}
+
+
+export const selectComponentPage = (newPage) => ({	
+	type: SELECT_COMPONENT_PAGE,
+	page: newPage
+})
+
+export const pageComponents = () => (dispatch, getState) => {
+	var selectedArtifact = getState().project.selectedArtifact;
+	var page = getState().project.page;
+
+	if (selectedArtifact && selectedArtifact.components) {
+		var offset = (page.current - 1) * page.size
+		var components = selectedArtifact.components.slice(offset, offset + page.size);
+		dispatch(receivePagedComponents(components));
+	}
+}	
+
+
+export const receivePagedComponents = (components) => ({
+	type: PAGE_COMPONENTS,
+	components: components
+})
