@@ -2,7 +2,7 @@ import React from 'react'
 import {render} from 'react-dom'
 import injectTapEventPlugin from 'react-tap-event-plugin'
 import { Provider } from 'react-redux'
-import { createStore,applyMiddleware } from 'redux'
+import { createStore, applyMiddleware, compose } from 'redux'
 import thunk from 'redux-thunk'
 import Main from './components/Main'
 import opendvsApp from './reducers'
@@ -13,7 +13,8 @@ injectTapEventPlugin();
 
 const middleware = [ thunk ]
 
-let store = createStore(opendvsApp,  applyMiddleware(...middleware))
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+let store = createStore(opendvsApp,  composeEnhancers(applyMiddleware(...middleware)))
 
 render(
   <Provider store={store}>
