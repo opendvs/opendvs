@@ -10,7 +10,7 @@ const ArtifactComponentRow = ({ component, handleClick }) => (
         <TableRowColumn style={{width: '15%'}}>{component.scope}</TableRowColumn>
         <TableRowColumn style={{width: '10%'}}>{component.group}</TableRowColumn>
         <TableRowColumn style={{width: '10%'}}>{component.occurrences}</TableRowColumn>
-        <TableRowColumn style={{width: '15%'}}><FlatButton style={{"color": COMPONENT_STATE_COLORS[component.state]}} onTouchTap={handleClick} label={component.state} /></TableRowColumn>
+        <TableRowColumn style={{width: '15%'}}><FlatButton disabled={component.state == 'UNKNOWN'} style={{"color": COMPONENT_STATE_COLORS[component.state]}} onTouchTap={handleClick} label={component.state} /></TableRowColumn>
       </TableRow>
 )
 

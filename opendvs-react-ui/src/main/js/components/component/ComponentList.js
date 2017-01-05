@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { Grid, Row, Col } from 'react-flexbox-grid/lib/index'
 import ComponentTable from './ComponentTable'
-import ComponentVersionDialogContainer from '../../containers/ComponentVersionDialogContainer'
+import ComponentVersionDialog from './ComponentVersionDialog'
 import { fetchComponentsIfNeeded, fetchComponents, selectPage } from '../../actions/component'
 import { toggleVersionDialog } from '../../actions/component'
 
@@ -26,12 +26,17 @@ class ComponentList extends Component {
 	  onComponentSelect = component => {
 		  this.props.dispatch(toggleVersionDialog(true, component))
 	  }
+
+	  onDialogClose = () => {
+		  this.props.dispatch(toggleVersionDialog(false, {}))
+	  }
+
 	render() {
 		 const { items, page, dialog } = this.props
 
 		 return (
 		  <div>
-		  	  <ComponentVersionDialogContainer />
+		  	  <ComponentVersionDialog dialog={dialog} onClose={this.onDialogClose} />
 		  	  <Grid style={gridStyle}>
 		        <Row>
 		          <h1>Fetched Components</h1>

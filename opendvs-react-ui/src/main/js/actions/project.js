@@ -25,6 +25,8 @@ export const RECEIVE_ARTIFACT = 'RECEIVE_ARTIFACT'
 export const PAGE_COMPONENTS = 'PAGE_ARTIFACT_COMPONENTS'
 export const SELECT_COMPONENT_PAGE = 'SELECT_ARTIFACT_COMPONENT_PAGE'
 
+export const TOGGLE_COMPONENT_DIALOG = 'TOGGLE_ARTIFACT_COMPONENT_DIALOG'
+
 export const selectPage = (newPage) => ({
 	type: SELECT_PAGE,
 	newPage: newPage
@@ -250,6 +252,23 @@ export const receivePagedComponents = (components) => ({
 	components: components
 })
 
+export const openComponentDialog = (component) => (dispatch) => {
+	return fetch(`${API_URL}/components/${component.group}:${component.name}/detail`)
+    .then(result=>result.json())
+    .then(items=> {
+    	var data = JSOG.decode(items);
+    	dispatch(toggleComponentDialog(true, data, component.version, component.state));
+    });
+}
+export const toggleComponentDialog = (open, component, version, state) => {	
+  return ({
+	type: TOGGLE_COMPONENT_DIALOG,
+	open: open,
+	component: component,
+	version: version,
+	state: state
+  })
+}
 
 
 const removeDuplicateUIDs = (components) => {

@@ -5,9 +5,11 @@ import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
 import { Legend, PieChart, Tooltip, Pie, Sector, Cell } from 'recharts'
 import { Grid, Row, Col } from 'react-flexbox-grid/lib/index'
-import { fetchProject, selectArtifact, pageComponents, selectComponentPage } from '../../actions/project'
+import ComponentVersionDialog from '../component/ComponentVersionDialog'
+import { fetchProject, selectArtifact, pageComponents, selectComponentPage, openComponentDialog, toggleComponentDialog } from '../../actions/project'
 import ArtifactSelect from './ArtifactSelect'
 import ArtifactComponentTable from './ArtifactComponentTable'
+import ArtifactBadge from './ArtifactBadge'
 
 export const COMPONENT_STATE_COLORS = {
 		UP_TO_DATE: '#4CAF50',
@@ -33,7 +35,8 @@ class Project extends Component {
 	  }
 
 	  onArtifactSelect = (event, index, value) => {
-		this.props.dispatch(selectArtifact(this.props.params.projectId, value));
+			this.props.dispatch(selectComponentPage(1));
+			this.props.dispatch(selectArtifact(this.props.params.projectId, value));
 	  }
 
 
@@ -41,8 +44,16 @@ class Project extends Component {
 	    this.props.dispatch(selectComponentPage(newPage))
 	  }
 
+	  onComponentClick = (component) => {
+		  this.props.dispatch(openComponentDialog(component))
+	  }
+
+	  onDialogClose = () => {
+		  this.props.dispatch(toggleComponentDialog(false, {}))
+	  }
+
 	render() {
-		const { item, artifacts, selectedArtifact, pagedComponents, page } = this.props
+		const { item, artifacts, selectedArtifact, pagedComponents, page, componentDialog } = this.props
 
 		var icon = '';
 	    var typeProperties = [];
@@ -63,6 +74,9 @@ class Project extends Component {
 	    var gridStyle = {width: "100%"};
 		
 		return (
+			<div>
+
+		  	  <ComponentVersionDialog dialog={componentDialog} onClose={this.onDialogClose} />
 			<Grid style={gridStyle}>
 				<Row>
 					<Col xs={6} md={8}>
@@ -79,13 +93,15 @@ class Project extends Component {
 		        </Row>
 		        <Row>
 					<Col xs={6} md={8}>
-						<ArtifactComponentTable components={pagedComponents}page={page} onPageChange={this.onPageChange} />
+						<ArtifactComponentTable components={pagedComponents} page={page} onPageChange={this.onPageChange} onComponentClick={this.onComponentClick} />
 					</Col>
 		
 					<Col xs={6} md={4}>
+						<ArtifactBadge artifact={selectedArtifact} components={selectedArtifact.components} /> 
 			        </Col>
 		        </Row>
 		    </Grid>
+		   </div>
 		)
 	}
 }

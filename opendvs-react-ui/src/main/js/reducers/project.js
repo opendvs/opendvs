@@ -1,5 +1,5 @@
 import {
-  REQUEST_PROJECT, RECEIVE_PROJECT, REQUEST_ARTIFACTS, RECEIVE_ARTIFACTS, REQUEST_ARTIFACT, RECEIVE_ARTIFACT, PAGE_COMPONENTS, SELECT_COMPONENT_PAGE
+  REQUEST_PROJECT, RECEIVE_PROJECT, REQUEST_ARTIFACTS, RECEIVE_ARTIFACTS, REQUEST_ARTIFACT, RECEIVE_ARTIFACT, PAGE_COMPONENTS, SELECT_COMPONENT_PAGE, TOGGLE_COMPONENT_DIALOG 
 } from '../actions/project'
 import { PAGE_SIZE } from '../config.js'
 
@@ -12,6 +12,7 @@ const project = (state = {
 	  selectedArtifact: {},
       pagedComponents: [],
 	  page: { current: 1, size: PAGE_SIZE },
+	  componentDialog: {open: false, component: {}, state: undefined, version: undefined}
 	}, action) => {
 	  switch (action.type) {
 	    case REQUEST_PROJECT:
@@ -72,7 +73,12 @@ const project = (state = {
 	      return {
 	        ...state,
 	        page: page
-	      }		      
+	      }		     
+	    case TOGGLE_COMPONENT_DIALOG:
+		      return {
+		        ...state,
+		        componentDialog: {open: action.open, component: action.component, version: action.version, state: action.state}
+		      }
 	    default:
 	      return state
 	  }

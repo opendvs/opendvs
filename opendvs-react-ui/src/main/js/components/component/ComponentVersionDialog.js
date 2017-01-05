@@ -10,16 +10,20 @@ import MenuItem from 'material-ui/MenuItem'
 import VersionRow from './VersionRow'
 import {Table, TableFooter, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 
-import { toggleVersionDialog } from '../../actions/component'
 
 
-const ComponentVersionDialog = ({ dispatch, dialog }) => {
+const ComponentVersionDialog = ({ dialog, onClose }) => {
 	var versions = [];
 	if (dialog.component && dialog.component.versions) {
 		dialog.component.versions.sort(function(a,b) {return b.published - a.published}); 
 
         dialog.component.versions.forEach((ver) => {
-	      versions.push(<VersionRow key={ver.id} version={ver} upToDate={ver.version == dialog.component.latestVersion} />);
+	      versions.push(<VersionRow key={ver.id} 
+	      							version={ver}
+	      							latest={ver.version == dialog.component.latestVersion}
+	      							outdated={dialog.state == 'OUTDATED' && dialog.version == ver.version}
+	      							vulnerable={dialog.state == 'VULNERABLE' && dialog.version == ver.version}
+	      							upToDate={dialog.state == 'UP_TO_DATE' && dialog.version == ver.version} />);
 	    });
 	}
 
@@ -28,7 +32,7 @@ const ComponentVersionDialog = ({ dispatch, dialog }) => {
             open={dialog.open}
 	        autoScrollBodyContent={true}
             title={`Versions for ${dialog.component.id}`}
-			onRequestClose={() => dispatch(toggleVersionDialog(false, {}))}>
+			onRequestClose={onClose}>
         <Table>
           <TableHeader adjustForCheckbox={false} displaySelectAll={false}>
             <TableRow>

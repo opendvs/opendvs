@@ -10,7 +10,7 @@ import {PAGINATION_OFFSET} from '../../config'
 import ArtifactComponentRow from './ArtifactComponentRow'
 import IconButton from 'material-ui/IconButton'
 
-const ArtifactComponentTable = ({ components, page, onPageChange }) => {
+const ArtifactComponentTable = ({ components, page, onPageChange, onComponentClick }) => {
 	var pageButtons = [];
 
     var start = page.current - PAGINATION_OFFSET;
@@ -46,7 +46,7 @@ const ArtifactComponentTable = ({ components, page, onPageChange }) => {
 	        </TableHeader>
 	        <TableBody>{
 	        	components.map(comp =>
-	        		<ArtifactComponentRow handleClick={(e) => this.setState({open: true, component: art})} component={comp} key={comp.id} />
+	        		<ArtifactComponentRow handleClick={(e) => onComponentClick(comp)} component={comp} key={comp.id} />
 	        	)
 	        }</TableBody>
 	        <TableFooter>
