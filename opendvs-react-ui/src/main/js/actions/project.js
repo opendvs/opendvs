@@ -260,6 +260,7 @@ export const receivePagedComponents = (components) => ({
 })
 
 export const openComponentDialog = (component) => (dispatch) => {
+	dispatch(toggleComponentDialog(true, {}, undefined, undefined));
 	return fetch(`${API_URL}/components/${component.group}:${component.name}/detail`)
     .then(result=>result.json())
     .then(items=> {
