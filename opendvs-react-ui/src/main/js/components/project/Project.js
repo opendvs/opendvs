@@ -6,7 +6,7 @@ import ContentAdd from 'material-ui/svg-icons/content/add';
 import { Legend, PieChart, Tooltip, Pie, Sector, Cell } from 'recharts'
 import { Grid, Row, Col } from 'react-flexbox-grid/lib/index'
 import ComponentVersionDialog from '../component/ComponentVersionDialog'
-import { fetchProject, selectArtifact, pageComponents, selectComponentPage, openComponentDialog, toggleComponentDialog } from '../../actions/project'
+import { fetchProject, selectArtifact, pageComponents, selectComponentPage, openComponentDialog, toggleComponentDialog, uploadArtifact } from '../../actions/project'
 import ArtifactSelect from './ArtifactSelect'
 import ArtifactComponentTable from './ArtifactComponentTable'
 import ArtifactBadge from './ArtifactBadge'
@@ -52,6 +52,15 @@ class Project extends Component {
 		  this.props.dispatch(toggleComponentDialog(false, {}))
 	  }
 
+	  onFile = (event) => {
+		  event.preventDefault();
+		  let file = event.target.files[0];
+		  let fd = new FormData();
+	      fd.append('artifact', file);
+
+	      this.props.dispatch(uploadArtifact(fd, this.props.item.id));
+	  }
+
 	render() {
 		const { item, artifacts, selectedArtifact, pagedComponents, page, componentDialog } = this.props
 
@@ -64,13 +73,16 @@ class Project extends Component {
 			  <Col xs={1} md={1}>
 			    <FloatingActionButton style={{"marginTop": "20px"}} secondary={true} mini={true} containerElement='label'>
 			    	<ContentAdd />
-			    	<input type="file" style={{"display": "none"}} onChange={(event) => onFile(event)}/>
+			    	<input type="file" style={{"display": "none"}} onChange={(event) => this.onFile(event)}/>
 			    </FloatingActionButton>
 			  </Col>
 			)
 		}
 	
-	
+		if (selectedArtifact && selectedArtifact.state != 'FINISHED') {
+	 	   icon = <CircularProgress style={{"marginRight": "10px"}} size={25}/>
+	    }
+
 	    var gridStyle = {width: "100%"};
 		
 		return (

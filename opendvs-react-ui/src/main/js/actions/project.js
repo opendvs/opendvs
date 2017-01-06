@@ -27,6 +27,8 @@ export const SELECT_COMPONENT_PAGE = 'SELECT_ARTIFACT_COMPONENT_PAGE'
 
 export const TOGGLE_COMPONENT_DIALOG = 'TOGGLE_ARTIFACT_COMPONENT_DIALOG'
 
+export const ARTIFACT_UPLOADED = 'ARTIFACT_UPLOADED'
+
 export const selectPage = (newPage) => ({
 	type: SELECT_PAGE,
 	newPage: newPage
@@ -71,6 +73,11 @@ export const requestProjectTypes = () => ({
 export const receiveProjectTypes = (data) => ({
   type: RECEIVE_PROJECT_TYPES,
   types: data
+})
+
+const artifactUploaded = (item) => ({
+  type: ARTIFACT_UPLOADED,
+  artifact: item
 })
 
 export const receiveProjects = (data) => ({
@@ -270,6 +277,34 @@ export const toggleComponentDialog = (open, component, version, state) => {
   })
 }
 
+export const uploadArtifact = (formData, projectId) => (dispatch) => {
+	// TODO: dispatch UPLOAD_STARTED action
+	  return new Promise((resolve, reject) => {
+		    var xhr = new XMLHttpRequest();
+		    
+		    xhr.open('post', `${API_URL}/project/${projectId}/upload`, true);
+		    
+		    xhr.onload = function () {
+		      if (this.status >= 200 && this.status < 300) {
+		        resolve(this.response);
+		      } else {
+		        reject(this.statusText);
+		      }
+		    };
+		    // TODO: track progress
+		    
+		    xhr.send(formData);
+
+		  }).then((response) => {
+			var data = JSOG.decode(JSON.parse(response));
+			dispatch(artifactUploaded(data));
+
+			data.components = removeDuplicateUIDs(data.components);
+	    	data.components.sort((a,b) => a.name.localeCompare(b.name));
+	    	dispatch(receiveArtifact(data));
+			dispatch(pageComponents());
+		  })
+}
 
 const removeDuplicateUIDs = (components) => {
 	  var keys = {};

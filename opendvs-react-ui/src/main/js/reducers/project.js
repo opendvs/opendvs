@@ -1,5 +1,5 @@
 import {
-  REQUEST_PROJECT, RECEIVE_PROJECT, REQUEST_ARTIFACTS, RECEIVE_ARTIFACTS, REQUEST_ARTIFACT, RECEIVE_ARTIFACT, PAGE_COMPONENTS, SELECT_COMPONENT_PAGE, TOGGLE_COMPONENT_DIALOG 
+  REQUEST_PROJECT, RECEIVE_PROJECT, REQUEST_ARTIFACTS, RECEIVE_ARTIFACTS, REQUEST_ARTIFACT, RECEIVE_ARTIFACT, PAGE_COMPONENTS, SELECT_COMPONENT_PAGE, TOGGLE_COMPONENT_DIALOG, ARTIFACT_UPLOADED
 } from '../actions/project'
 import { PAGE_SIZE } from '../config.js'
 
@@ -61,6 +61,14 @@ const project = (state = {
 	        artifacts: action.artifacts
 	      }
 
+	    case ARTIFACT_UPLOADED:
+	      var artifacts = state.artifacts
+	      artifacts.unshift(action.artifact)
+
+	      return {
+	    	...state,
+	    	artifacts: artifacts
+	      }
 	    case PAGE_COMPONENTS:
 	      return {
 	        ...state,

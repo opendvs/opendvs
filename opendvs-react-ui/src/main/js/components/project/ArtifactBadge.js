@@ -31,20 +31,19 @@ class ArtifactBadge extends Component {
 	constructor(props, context) {
 	    super(props, context);
 	    this.state = {
-	    	chartData: {},
+	    	chartData: undefined,
 	    	currentSize: 0
 	    }
 	}
 
   componentDidMount() {
 	const { artifact, components } = this.props
-	if (components) {
+	if (components && components.length > 0) {
 		this.setState({chartData: prepareChartData(components), currentSize: components.length});
 	}
   }
 
 	  componentWillReceiveProps(nextProps) {
-		  console.log(nextProps);
 		  const { artifact, components } = nextProps
 			if (components && this.state.currentSize != components.length) {
 				this.setState({chartData: prepareChartData(components), currentSize: components.length});
@@ -54,22 +53,26 @@ class ArtifactBadge extends Component {
 	render() {
 		const { artifact, components } = this.props
 
-		if (artifact && artifact.probeAction) {
+		if (artifact) {
+			  if (components && components.length > 0 && this.state.chartData) {
+			  var chart = (<PieChart width={400} height={200}>
+	           <Pie  startAngle={180} endAngle={0} data={this.state.chartData} innerRadius={20} outerRadius={80}>
+	             {
+	             	this.state.chartData.map((entry, index) => <Cell key={index} fill={chartColors[index]}/>)
+	             }
+	           </Pie>
+	           <Legend verticalAlign="bottom" height={80}/>
+	           <Tooltip/>
+	      </PieChart>);
+			  }
 		      var detail = (<div><i><small>Initiated on {new Date(artifact.initiated).toString()}</small></i><br />
 		      <i><small>{artifact.identity}</small></i><br />
-		      <i><small>Analysis {artifact.probeAction.state ? artifact.probeAction.state : '-'}</small></i><br />
+		      <i><small>Analysis {artifact.probeAction && artifact.probeAction.state ? artifact.probeAction.state : '-'}</small></i><br />
 		      <i><small>Overall state {artifact.state}</small></i>
 		      <br />
 		      <br />
-		      <PieChart width={400} height={200}>
-		           <Pie  startAngle={180} endAngle={0} data={this.state.chartData} innerRadius={20} outerRadius={80}>
-		             {
-		             	this.state.chartData.map((entry, index) => <Cell key={index} fill={chartColors[index]}/>)
-		             }
-		           </Pie>
-		           <Legend verticalAlign="bottom" height={80}/>
-		           <Tooltip/>
-		      </PieChart></div>);
+		      {chart}
+		      </div>);
 		}
 		return (
 	

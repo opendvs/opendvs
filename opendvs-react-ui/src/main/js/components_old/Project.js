@@ -325,7 +325,7 @@ class ProjectDetail extends Component {
   }
 
   _handleFileChange(e) {
-	  e.preventDefault();
+	  //e.preventDefault();
 	  let file = e.target.files[0];
 	  let projectid = this.state.project.id;
 	  new Promise((resolve, reject) => {
