@@ -304,6 +304,7 @@ export const uploadArtifact = (formData, projectId) => (dispatch) => {
 	    	data.components.sort((a,b) => a.name.localeCompare(b.name));
 	    	dispatch(receiveArtifact(data));
 			dispatch(pageComponents());
+			dispatch(toggleSnackbar(true, `Artifact ${data.name} was successfully uploaded`));
 		  })
 }
 
@@ -328,3 +329,16 @@ const removeDuplicateUIDs = (components) => {
 
 	  return newarr;
   }
+
+
+export const handleArtifactUpdate = (event) => (dispatch, getState) => {
+	var project = getState().project;
+
+	if (project && project.item && project.item.id == event.project.id) {
+	    if (!project.selectedArtifact || project.selectedArtifact.id == event.artifact.id) {
+	    	dispatch(selectArtifact(event.project.id, event.artifact.id));
+		}
+	}
+
+	dispatch(toggleSnackbar(true, `Artifact ${event.artifact.name} changed state to ${event.artifact.state}`));
+}
