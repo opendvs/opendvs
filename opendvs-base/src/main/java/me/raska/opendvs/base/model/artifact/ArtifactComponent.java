@@ -14,19 +14,12 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import me.raska.opendvs.base.model.probe.ProbeActionStep;
 
-//TODO: get rid of no/all/builder
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder(toBuilder = true)
 @Entity
 @JsonIdentityInfo(generator = JSOGGenerator.class)
 @Table(name = "ARTIFACT_COMPONENT", indexes = { @Index(columnList = "uid") })
@@ -58,15 +51,30 @@ public class ArtifactComponent {
 
     private String parentUid;
 
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @ManyToOne(optional = false)
     private Artifact artifact;
 
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @ManyToOne(optional = false)
     private ProbeActionStep probeActionStep;
 
     private State state;
+
+    public ArtifactComponent clone() {
+        ArtifactComponent c = new ArtifactComponent();
+        c.name = this.name;
+        c.id = this.id;
+        c.uid = this.uid;
+        c.group = this.group;
+        c.version = this.version;
+        c.scope = this.scope;
+        c.hash = this.hash;
+        c.parentUid = this.parentUid;
+        c.state = this.state;
+
+        return c;
+    }
 
     public static enum State {
         UNKNOWN, UP_TO_DATE, OUTDATED, VULNERABLE;

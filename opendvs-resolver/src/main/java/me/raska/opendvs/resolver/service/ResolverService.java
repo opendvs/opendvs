@@ -232,11 +232,11 @@ public class ResolverService {
         // don't send unneccessary stuff - requires shallow copy
         List<ArtifactComponent> clonedComponents = new ArrayList<>(components.size());
         components.forEach(c -> {
-            ArtifactComponent nc = c.toBuilder().probeActionStep(null).artifact(null).build();
-            clonedComponents.add(nc);
+
+            clonedComponents.add(c.clone());
         });
-        Artifact art = artifact.toBuilder().components(null).probeAction(null).project(null).build();
-        Project prj = project.toBuilder().artifacts(null).typeProperties(null).build(); 
+        Artifact art = artifact.clone();
+        Project prj = project.clone();
         fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(art, prj));
     }
 
