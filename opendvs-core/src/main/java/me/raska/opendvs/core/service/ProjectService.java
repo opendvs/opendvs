@@ -65,12 +65,19 @@ public class ProjectService {
     }
 
     public Page<Artifact> getProjectArtifacts(String id, Pageable page) {
-        Project p = projectRepository.findOne(id);
-        if (p == null) {
-            throw new InvalidRequestException("Project doesn't exist");
-        }
+        Project project = getProject(id);
 
-        return artifactRepository.findByProjectOrderByInitiatedDesc(p, page);
+        Page<Artifact> p = artifactRepository.findByProjectOrderByInitiatedDesc(project, page);
+
+        // cleanup
+        p.getContent().forEach(a -> {
+            a.setComponents(null);
+            a.setProject(null);
+            if (a.getProbeAction() != null) {
+                a.getProbeAction().setSteps(null);
+            }
+        });
+        return p;
     }
 
     public Artifact getProjectArtifact(String project, String artifact) {

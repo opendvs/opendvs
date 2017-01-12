@@ -21,58 +21,49 @@ import me.raska.opendvs.core.service.ProjectService;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/projects")
 public class ProjectRestController {
     @Autowired
     private ProjectService projectService;
 
-    @RequestMapping(value = "/project/types", method = RequestMethod.GET)
+    @RequestMapping(value = "/types", method = RequestMethod.GET)
     public List<ProjectType> getTypes() {
         return projectService.getAvailableHandlers();
     }
 
-    @RequestMapping(value = "/projects", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public Page<Project> getAvailableProjects(Pageable p) {
         return projectService.getAvailableProjects(p);
     }
 
-    @RequestMapping(value = "/project/{id}", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.POST)
+    public Project createProject(@RequestBody Project p) {
+        return projectService.createProject(p);
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Project getProject(@PathVariable("id") String projectId) {
         return projectService.getProject(projectId);
     }
 
-    @RequestMapping(value = "/project/{id}/artifacts", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}/artifacts", method = RequestMethod.GET)
     public Page<Artifact> getProjectArtifacts(@PathVariable("id") String projectId, Pageable p) {
-        Page<Artifact> page = projectService.getProjectArtifacts(projectId, p);
-
-        page.getContent().forEach(a -> {
-            a.setComponents(null);
-            a.setProject(null);
-            if (a.getProbeAction() != null) {
-                a.getProbeAction().setSteps(null);
-            }
-        });
-        return page;
+        return projectService.getProjectArtifacts(projectId, p);
     }
 
-    @RequestMapping(value = "/project/{id}/artifact/{artifactId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}/artifacts/{artifactId}", method = RequestMethod.GET)
     public Artifact getProjectArtifact(@PathVariable("id") String projectId,
             @PathVariable("artifactId") String artifactId) {
         return projectService.getProjectArtifact(projectId, artifactId);
     }
 
-    @RequestMapping(value = "/projects", method = RequestMethod.POST)
-    public Project createProject(@RequestBody Project p) {
-        return projectService.createProject(p);
-    }
-
-    @RequestMapping(value = "/project/{id}/upload", method = RequestMethod.POST)
+    @RequestMapping(value = "/{id}/upload", method = RequestMethod.POST)
     public Artifact uploadArtifact(@PathVariable("id") String projectId,
             @RequestParam(name = "artifact") MultipartFile file) {
         return projectService.uploadArtifact(projectId, file);
     }
 
-    @RequestMapping(value = "/project/{id}/trigger", method = RequestMethod.POST)
+    @RequestMapping(value = "/{id}/trigger", method = RequestMethod.POST)
     public Artifact triggetScan(@PathVariable("id") String projectId, @RequestBody Artifact artifact) {
         return projectService.triggerScan(projectId, artifact);
     }
