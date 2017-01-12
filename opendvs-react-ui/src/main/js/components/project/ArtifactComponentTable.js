@@ -32,6 +32,22 @@ const ArtifactComponentTable = ({ components, page, onPageChange, onComponentCli
 		  pageButtons.push(<FlatButton onClick={() => onPageChange(i)} key={i} secondary={i == page.current}>{i}</FlatButton>)
     }
 
+    if (page.total > 0) {
+    	var footer = (
+	        <TableFooter>
+	          <TableRow> 
+	          	<TableRowColumn style={{paddingTop: 20, textAlign: "center"}}>
+	              <IconButton disabled={page.current == 1} style={{top: 8}} onClick={() => onPageChange(page.current - 1)}>
+	                <ChevronLeft/>
+	              </IconButton>
+	              {pageButtons}
+	              <IconButton disabled={page.current == page.total}  style={{top: 8}} onClick={() => onPageChange(page.current + 1)} >
+	                <ChevronRight/>
+	              </IconButton>
+	              </TableRowColumn>
+	          </TableRow>
+	        </TableFooter>)
+    }
 	return (
 		<Table>
 	        <TableHeader adjustForCheckbox={false} displaySelectAll={false}>
@@ -49,19 +65,7 @@ const ArtifactComponentTable = ({ components, page, onPageChange, onComponentCli
 	        		<ArtifactComponentRow handleClick={(e) => onComponentClick(comp)} component={comp} key={comp.id} />
 	        	)
 	        }</TableBody>
-	        <TableFooter>
-	          <TableRow> 
-	          	<TableRowColumn style={{paddingTop: 20, textAlign: "center"}}>
-	              <IconButton disabled={page.current == 1} style={{top: 8}} onClick={() => onPageChange(page.current - 1)}>
-	                <ChevronLeft/>
-	              </IconButton>
-	              {pageButtons}
-	              <IconButton disabled={page.current == page.total}  style={{top: 8}} onClick={() => onPageChange(page.current + 1)} >
-	                <ChevronRight/>
-	              </IconButton>
-	              </TableRowColumn>
-	          </TableRow>
-	        </TableFooter>
+	        {footer}
 	    </Table>
 	)
 }
