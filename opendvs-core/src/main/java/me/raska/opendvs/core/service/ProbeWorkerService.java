@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import me.raska.opendvs.base.core.amqp.CoreRabbitService;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.artifact.ArtifactComponent;
 import me.raska.opendvs.base.model.probe.ProbeAction;
@@ -43,7 +44,8 @@ public class ProbeWorkerService {
     private RabbitTemplate resolverTemplate;
 
     @Autowired
-    private WebSocketService websocketService;
+    @Qualifier(CoreRabbitService.FANOUT_QUALIFIER)
+    private RabbitTemplate fanoutTemplate;
 
     @Transactional
     public ResolverAction process(ProbeAction action) {
@@ -82,10 +84,11 @@ public class ProbeWorkerService {
         act.setSteps(steps);
 
         art.setState(Artifact.State.RESOLVING);
-        Artifact artifact = artifactRepository.save(art);
-        // TODO: strip and send to fanout
+        artifactRepository.save(art);
         probeActionRepository.save(act);
         artifactComponentRepository.save(components);
+
+        // Send message to Fanout, but only outside transactional context -> in parent method
 
         // since artifact change occured
         ResolverAction resact = new ResolverAction();
