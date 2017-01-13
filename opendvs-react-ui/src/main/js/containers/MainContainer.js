@@ -14,6 +14,7 @@ import Drawer from 'material-ui/Drawer';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import SnackbarContainer from './SnackbarContainer'
+import ProjectListContainer from '../containers/ProjectListContainer'
 
 
 const muiTheme = getMuiTheme({

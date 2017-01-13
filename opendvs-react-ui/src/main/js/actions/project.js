@@ -129,7 +129,7 @@ export const toggleProjectDialog = (opened) =>  {
 }
 
 export const fetchProjectTypes = () => (dispatch) => {
-  return fetch(`${API_URL}/project/types`)
+  return fetch(`${API_URL}/projects/types`)
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -198,7 +198,7 @@ export const createNewProject = (project) => (dispatch, state) => {
 
 export const fetchProject = (id) => (dispatch) => {
   dispatch(requestProject())
-  return fetch(`${API_URL}/project/${id}`)
+  return fetch(`${API_URL}/projects/${id}`)
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -209,7 +209,7 @@ export const fetchProject = (id) => (dispatch) => {
 
 export const selectArtifact = (projectId, artId) => (dispatch) => {
   dispatch(requestArtifact())
-  return fetch(`${API_URL}/project/${projectId}/artifact/${artId}`)
+  return fetch(`${API_URL}/projects/${projectId}/artifacts/${artId}`)
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -225,7 +225,7 @@ export const selectArtifact = (projectId, artId) => (dispatch) => {
 
 const fetchArtifacts = (id) => (dispatch) => {
   dispatch(requestArtifacts())
-  return fetch(`${API_URL}/project/${id}/artifacts`)
+  return fetch(`${API_URL}/projects/${id}/artifacts`)
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -283,7 +283,7 @@ export const uploadArtifact = (formData, projectId) => (dispatch) => {
 	  return new Promise((resolve, reject) => {
 		    var xhr = new XMLHttpRequest();
 		    
-		    xhr.open('post', `${API_URL}/project/${projectId}/upload`, true);
+		    xhr.open('post', `${API_URL}/projects/${projectId}/upload`, true);
 		    
 		    xhr.onload = function () {
 		      if (this.status >= 200 && this.status < 300) {
@@ -334,10 +334,8 @@ const removeDuplicateUIDs = (components) => {
 export const handleArtifactUpdate = (event) => (dispatch, getState) => {
 	var project = getState().project;
 
-	if (project && project.item && project.item.id == event.project.id) {
-	    if (!project.selectedArtifact || project.selectedArtifact.id == event.artifact.id) {
-	    	dispatch(selectArtifact(event.project.id, event.artifact.id));
-		}
+    if (project.selectedArtifact.id == event.artifact.id) {
+    	dispatch(selectArtifact(project.item.id, event.artifact.id));
 	}
 
 	dispatch(toggleSnackbar(true, `Artifact ${event.artifact.name} changed state to ${event.artifact.state}`));
