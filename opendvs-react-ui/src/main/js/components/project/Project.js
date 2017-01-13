@@ -78,8 +78,8 @@ class Project extends Component {
 			  </Col>
 			)
 		}
-	
-		if (selectedArtifact && selectedArtifact.state != 'FINISHED') {
+
+		if (selectedArtifact.state && selectedArtifact.state != 'FINISHED') {
 	 	   icon = <CircularProgress style={{"marginRight": "10px"}} size={25}/>
 	    }
 

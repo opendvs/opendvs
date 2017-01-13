@@ -53,7 +53,7 @@ class ArtifactBadge extends Component {
 	render() {
 		const { artifact, components } = this.props
 
-		if (artifact) {
+		if (artifact && artifact.initiated) {
 			  if (components && components.length > 0 && this.state.chartData) {
 			  var chart = (<PieChart width={400} height={200}>
 	           <Pie  startAngle={180} endAngle={0} data={this.state.chartData} innerRadius={20} outerRadius={80}>
@@ -65,7 +65,9 @@ class ArtifactBadge extends Component {
 	           <Tooltip/>
 	      </PieChart>);
 			  }
-		      var detail = (<div><i><small>Initiated on {new Date(artifact.initiated).toString()}</small></i><br />
+		      var detail = (<div>
+		        <h2>Artifact <i>{artifact.name}</i></h2>
+		      <i><small>Initiated on {new Date(artifact.initiated).toString()}</small></i><br />
 		      <i><small>{artifact.identity}</small></i><br />
 		      <i><small>Analysis {artifact.probeAction && artifact.probeAction.state ? artifact.probeAction.state : '-'}</small></i><br />
 		      <i><small>Overall state {artifact.state}</small></i>
@@ -77,7 +79,6 @@ class ArtifactBadge extends Component {
 		return (
 	
 			<div>
-		        <h2>Artifact <i>{artifact.name}</i></h2>
 		        {detail}
 		    </div>
 		)
