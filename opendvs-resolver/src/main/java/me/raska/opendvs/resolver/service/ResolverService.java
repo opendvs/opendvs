@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import me.raska.opendvs.base.core.amqp.CoreRabbitService;
-import me.raska.opendvs.base.core.event.ArtifactUpdateEvent;
+import me.raska.opendvs.base.core.event.ComponentsResolvedEvent;
 import me.raska.opendvs.base.model.Component;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.artifact.ArtifactComponent;
@@ -237,7 +237,7 @@ public class ResolverService {
         });
         Artifact art = artifact.clone();
         Project prj = project.clone();
-        fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(art, prj));
+        fanoutTemplate.convertAndSend(new ComponentsResolvedEvent(clonedComponents, art, prj));
     }
 
 }

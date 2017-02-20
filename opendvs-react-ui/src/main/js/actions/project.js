@@ -340,3 +340,14 @@ export const handleArtifactUpdate = (event) => (dispatch, getState) => {
 
 	dispatch(toggleSnackbar(true, `Artifact ${event.artifact.name} changed state to ${event.artifact.state}`));
 }
+
+
+export const handleResolvedComponents = (event) => (dispatch, getState) => {
+	var project = getState().project;
+
+    if (event.components.length > 0) {
+    	var comps = removeDuplicateUIDs(event.components);
+    	dispatch(toggleSnackbar(true, `Resolved ${comps.length} components for artifact ${event.artifact.name}`));
+        // TODO: reload necessary details
+	}
+}

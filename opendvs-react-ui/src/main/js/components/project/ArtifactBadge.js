@@ -51,8 +51,7 @@ class ArtifactBadge extends Component {
 	  }
 	
 	render() {
-		const { artifact, components } = this.props
-
+		const { artifact, components } = this.props;
 		if (artifact && artifact.initiated) {
 			  if (components && components.length > 0 && this.state.chartData) {
 			  var chart = (<PieChart width={400} height={200}>

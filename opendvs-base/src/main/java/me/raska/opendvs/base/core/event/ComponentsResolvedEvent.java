@@ -11,12 +11,11 @@ import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.artifact.ArtifactComponent;
 import me.raska.opendvs.base.model.project.Project;
 
-// TODO: find out Jackson + Lombok integration
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ArtifactResolvedEvent extends FanoutEvent {
+public class ComponentsResolvedEvent extends FanoutEvent {
     private Collection<ArtifactComponent> components;
     private Artifact artifact;
     private Project project;

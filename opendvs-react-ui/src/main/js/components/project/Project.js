@@ -54,8 +54,8 @@ class Project extends Component {
 
 	  onFile = (event) => {
 		  event.preventDefault();
-		  let file = event.target.files[0];
-		  let fd = new FormData();
+		  const file = event.target.files[0];
+		  const fd = new FormData();
 	      fd.append('artifact', file);
 
 	      this.props.dispatch(uploadArtifact(fd, this.props.item.id));

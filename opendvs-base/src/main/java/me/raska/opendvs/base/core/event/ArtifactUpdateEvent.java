@@ -8,7 +8,6 @@ import me.raska.opendvs.base.core.FanoutEvent;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.project.Project;
 
-// TODO: find out Jackson + Lombok integration
 @Getter
 @Setter
 @NoArgsConstructor

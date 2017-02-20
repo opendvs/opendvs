@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux'
 
-import { handleArtifactUpdate } from '../actions/project'
+import { handleArtifactUpdate, handleResolvedComponents } from '../actions/project'
 import * as JSOG from 'jsog'
 import {cyan500} from 'material-ui/styles/colors';
 import AppBar from 'material-ui/AppBar';
@@ -46,6 +46,9 @@ export class MainWrapper extends Component {
 		        		if (event.headers.eventType == "ArtifactUpdateEvent") {
 		        			var object = JSOG.decode(JSON.parse(event.body));
 		        			props.dispatch(handleArtifactUpdate(object))
+		        		} else if (event.headers.eventType == "ComponentsResolvedEvent") {
+		        			var object = JSOG.decode(JSON.parse(event.body));
+		        			props.dispatch(handleResolvedComponents(object))
 		        		}
 		        	} else {
 		        		console.log("Unexpected event obtained", event)
