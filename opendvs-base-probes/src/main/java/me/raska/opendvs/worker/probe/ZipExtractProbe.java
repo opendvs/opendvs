@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,13 +70,12 @@ public class ZipExtractProbe implements NativeProbe {
         if (file.isFile()) {
             try {
                 if (EXTRACT_MIME.contains(Files.probeContentType(file.toPath()))) {
-                    ArtifactComponent component = new ArtifactComponent();
+                    final ArtifactComponent component = new ArtifactComponent();
+                    component.setId(UUID.randomUUID().toString());
                     component.setUid("zip:" + file.getName());
                     component.setName(file.getName());
 
-                    if (parent != null) {
-                        component.setParentUid(parent.getUid());
-                    }
+                    component.setParentId((parent != null) ? parent.getId() : null);
                     component.setHash(Util.getFileSha1Checksum(file));
                     component.setGroup("zip");
 
@@ -104,13 +104,12 @@ public class ZipExtractProbe implements NativeProbe {
                 }).forEach(p -> {
                     try {
                         File componentFile = p.toFile();
-                        ArtifactComponent component = new ArtifactComponent();
+                        final ArtifactComponent component = new ArtifactComponent();
+                        component.setId(UUID.randomUUID().toString());
                         component.setUid("zip:" + componentFile.getName());
                         component.setName(componentFile.getName());
 
-                        if (parent != null) {
-                            component.setParentUid(parent.getUid());
-                        }
+                        component.setParentId((parent != null) ? parent.getId() : null);
                         component.setHash(Util.getFileSha1Checksum(componentFile));
                         component.setGroup("zip");
 

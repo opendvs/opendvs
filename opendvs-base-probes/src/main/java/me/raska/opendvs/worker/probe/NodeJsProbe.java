@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.slf4j.Logger;
@@ -50,37 +51,40 @@ public class NodeJsProbe implements NativeProbe {
         // TODO: Build full dependency tree, e.g. via https://github.com/pahen/madge
         final NodePackage pkg = jsonMapper.readValue(f, NodePackage.class);
         final ArtifactComponent parentc = new ArtifactComponent();
+        parentc.setId(UUID.randomUUID().toString());
         parentc.setGroup("npm");
         parentc.setVersion(pkg.getVersion());
         parentc.setName(pkg.getName());
         parentc.setUid("npm:" + parentc.getName() + ":" + parentc.getVersion());
-        parentc.setParentUid((parentComponent != null) ? parentComponent.getUid() : null);
+        parentc.setParentId((parentComponent != null) ? parentComponent.getId() : null);
         parentc.setScope("runtime");
         components.add(parentc);
 
 
         if (pkg.getDependencies() != null) {
             for (Entry<String, String> entry: pkg.getDependencies().entrySet()) {
-                ArtifactComponent c = new ArtifactComponent();
+                final ArtifactComponent c = new ArtifactComponent();
+                c.setId(UUID.randomUUID().toString());
                 c.setScope("runtime"); // this is always runtime
                 c.setGroup("npm");
                 c.setVersion(entry.getValue());
                 c.setName(entry.getKey());
                 c.setUid("npm:"+c.getName() + ":" + c.getVersion());
-                c.setParentUid(parentc.getUid());
+                c.setParentId(parentc.getId());
                 components.add(c);
             }
         }
 
         if (pkg.getDevDependencies() != null) {
             for (Entry<String, String> entry: pkg.getDevDependencies().entrySet()) {
-                ArtifactComponent c = new ArtifactComponent();
+                final ArtifactComponent c = new ArtifactComponent();
+                c.setId(UUID.randomUUID().toString());
                 c.setScope("test"); // TODO: validate if we want to use test instead of devel
                 c.setGroup("npm");
                 c.setVersion(entry.getValue());
                 c.setName(entry.getKey());
                 c.setUid("npm:"+c.getName() + ":" + c.getVersion());
-                c.setParentUid(parentc.getUid());
+                c.setParentId(parentc.getId());
                 components.add(c);
             }
         }

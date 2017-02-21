@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -91,33 +92,33 @@ public class MavenProbe implements NativeProbe {
         final boolean isEffective = f != effectivePom;
 
         final ArtifactComponent parentc = new ArtifactComponent();
+        parentc.setId(UUID.randomUUID().toString());
         parentc.setGroup("maven");
         parentc.setVersion(model.getVersion());
         parentc.setName(model.getGroupId() + ":" + model.getArtifactId());
         parentc.setUid("maven:" + parentc.getName() + ":" + parentc.getVersion());
-        parentc.setParentUid((parentComponent != null) ? parentComponent.getUid() : null);
+        parentc.setParentId((parentComponent != null) ? parentComponent.getId() : null);
         parentc.setScope("runtime");
         components.add(parentc);
 
         Map<String, String> properties = mapMavenProperties(model);
         for (Dependency dep : model.getDependencies()) {
-            ArtifactComponent c = new ArtifactComponent();
+            final ArtifactComponent c = new ArtifactComponent();
+            c.setId(UUID.randomUUID().toString());
             c.setScope((dep.getScope() == null) ? "runtime" : dep.getScope());
             c.setGroup("maven");
 
             String version = dep.getVersion();
-            if (!isEffective) {
+            if (!isEffective && version != null) {
                 // replace all unresolved properties with this nasty hack
-                if (version != null) {
-                    for (Entry<String, String> entry : properties.entrySet()) {
-                        version = version.replace(entry.getKey(), entry.getValue());
-                    }
+                for (Entry<String, String> entry : properties.entrySet()) {
+                    version = version.replace(entry.getKey(), entry.getValue());
                 }
             }
             c.setVersion(version);
             c.setName(dep.getGroupId() + ":" + dep.getArtifactId());
             c.setUid("maven:" + c.getName() + ":" + c.getVersion());
-            c.setParentUid(parentc.getUid());
+            c.setParentId(parentc.getId());
             components.add(c);
         }
 

@@ -71,7 +71,6 @@ public class ProbeWorkerService {
 
                 if (cs != null) {
                     cs.stream().forEach(c -> {
-                        c.setId(null);
                         c.setArtifact(art);
                         c.setProbeActionStep(st);
                         c.setState(ArtifactComponent.State.UNKNOWN);

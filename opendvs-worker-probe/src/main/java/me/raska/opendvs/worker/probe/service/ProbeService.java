@@ -60,10 +60,8 @@ public class ProbeService {
             do {
                 // Loop protection
                 if (counter > action.getMaxIterations()) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Forcely ended detection in action " + action.getId()
-                                + " due to reached threshold of maximum iterations");
-                    }
+                    logger.debug("Forcely ended detection in action {} due to reached threshold of maximum iterations",
+                            action.getId());
                     action.getSteps().add(Util.generateErrorStep(
                             "Reached maximum " + action.getMaxIterations() + " iterations, stopping!"));
                     break;
@@ -72,10 +70,9 @@ public class ProbeService {
                 List<ArtifactComponent> contextExtracted = new ArrayList<>(extractedComponents);
                 extractedComponents.clear();
 
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Trying to detect and extract components in action " + action.getId()
-                            + ", previous iteration extracted " + contextExtracted.size() + " components");
-                }
+                logger.debug(
+                        "Trying to detect and extract components in action {}, previous iteration extracted {} components",
+                        action.getId(), contextExtracted.size());
                 for (NativeProbe probe : nativeProbes) {
 
                     try {
