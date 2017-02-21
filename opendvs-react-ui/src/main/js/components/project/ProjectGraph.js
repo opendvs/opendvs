@@ -2,8 +2,10 @@ import React, {Component} from 'react';
 import Divider from 'material-ui/Divider';
 import ArtifactSelect from './ArtifactSelect'
 import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
-import { fetchProject, selectArtifact, toggleArtifactGroup } from '../../actions/project'
+import { fetchProject, selectArtifact, toggleArtifactGroup, toggleArtifactScope, toggleArtifactGraphHierarchy } from '../../actions/project'
 import Toggle from 'material-ui/Toggle';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 import { Link } from 'react-router'
 import { Grid, Row, Col } from 'react-flexbox-grid/lib/index'
 import Graph from 'react-graph-vis'
@@ -17,8 +19,16 @@ class ProjectGraph extends Component {
 		}
 	  }
 
+	  onGraphHierarchyToggle = (event, value) => {
+		  this.props.dispatch(toggleArtifactGraphHierarchy());
+	  }
+
 	  onArtifactSelect = (event, index, value) => {
-			this.props.dispatch(selectArtifact(this.props.params.projectId, value));
+		  this.props.dispatch(selectArtifact(this.props.params.projectId, value));
+	  }
+
+	  onScopeToggle = (scope, value) => {
+		  this.props.dispatch(toggleArtifactScope(scope, value));
 	  }
 
 	  onGroupToggle = (group, value) => {
@@ -26,7 +36,7 @@ class ProjectGraph extends Component {
 	  }
 
 	  render() {
-		const { item, artifacts, selectedArtifact, unselectedGroups } = this.props
+		const { item, artifacts, selectedArtifact, unselectedGroups, unselectedScopes, graphHierarchy } = this.props
 
 
 	    var gridStyle = {width: "100%"};
@@ -37,14 +47,14 @@ class ProjectGraph extends Component {
 				  edges: [],
 		};
 		var toggles = [];
+		var scopeToggles = [];
 		
 		const toggleBlockStyle = {
 			margin: '10px'
 		};
 
-		console.log(unselectedGroups);
 		if (selectedArtifact && selectedArtifact.raw_components) {
-			const components = selectedArtifact.raw_components.filter((entry) => !unselectedGroups.includes(entry.group));
+			const components = selectedArtifact.raw_components.filter((entry) => !unselectedGroups.includes(entry.group) && !unselectedScopes.includes(entry.scope))
 			graph.nodes = components.map((entry) => ({
 					id: entry.id,
 					label: entry.uid,
@@ -59,7 +69,11 @@ class ProjectGraph extends Component {
   		    graph.edges = components.filter((entry) => entry.parentId != null).map((entry) => ({from: entry.parentId, to: entry.id}));
 
 			var groups = [...new Set(selectedArtifact.raw_components.map(entry => entry.group))];
-			toggles = groups.map(group => <div key={group} style={toggleBlockStyle}><Toggle onToggle={(event, val) => this.onGroupToggle(group, val)} label={group} defaultToggled={true} /></div>);
+			toggles = groups.map(group => <div key={group} style={toggleBlockStyle}><Toggle onToggle={(event, val) => this.onGroupToggle(group, val)} label={group} toggled={!unselectedGroups.includes(group)} /></div>);
+
+			var scopes = [...new Set(selectedArtifact.raw_components.map(entry => entry.scope))];
+			scopeToggles = scopes.map(scope => <div key={scope} style={toggleBlockStyle}><Toggle onToggle={(event, val) => this.onScopeToggle(scope, val)} label={(scope)? scope: 'Undefined'} toggled={!unselectedScopes.includes(scope)} /></div>);
+			
 		}
 
 				var options = {
@@ -72,7 +86,7 @@ class ProjectGraph extends Component {
 					},
 				    layout: {
 				        hierarchical: {
-				            enabled: true,
+				            enabled: graphHierarchy,
 				            levelSeparation: 600,
 				            nodeSpacing: 300,
 				            treeSpacing: 100,
@@ -118,10 +132,22 @@ class ProjectGraph extends Component {
 		          	</Col>
 					<Col xs={5} md={3}>
 						<ArtifactSelect artifacts={artifacts} selectedArtifact={selectedArtifact} onArtifactSelect={this.onArtifactSelect} />
+			          <div style={toggleBlockStyle}>
+			  			<Toggle onToggle={this.onGraphHierarchyToggle} label="Hierarchical graph" toggled={graphHierarchy} />
+			  	  	  </div>
 		          	</Col>
 		        </Row>
 		        <Row>
 		          {toggles}
+		        </Row>
+		        <Row>
+		          <Divider />
+		        </Row>
+		        <Row>
+		          {scopeToggles}
+		        </Row>
+		        <Row>
+		          <Divider />
 		        </Row>
 		        <Row>
 					<Col xs={12} md={12}>

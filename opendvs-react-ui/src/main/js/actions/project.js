@@ -17,6 +17,8 @@ export const CREATE_PROJECT_REQUEST = 'CREATE_PROJECT_REQUEST'
 export const CREATE_PROJECT = 'CREATE_PROJECT'
 
 export const TOGGLE_ARTIFACT_GROUP = 'TOGGLE_ARTIFACT_GROUP'
+export const TOGGLE_ARTIFACT_GRAPH_HIERARCHY = 'TOGGLE_ARTIFACT_GRAPH_HIERARCHY'
+export const TOGGLE_ARTIFACT_SCOPE = 'TOGGLE_ARTIFACT_SCOPE'
 export const REQUEST_PROJECT = 'REQUEST_PROJECT'
 export const RECEIVE_PROJECT = 'RECEIVE_PROJECT'
 export const REQUEST_ARTIFACTS = 'REQUEST_ARTIFACTS'
@@ -150,6 +152,20 @@ export const toggleArtifactGroup = (group, value) => {
 		type: TOGGLE_ARTIFACT_GROUP,
 		group: group,
 		value: value
+	})
+}
+
+export const toggleArtifactScope = (scope, value) => {
+	return ({
+		type: TOGGLE_ARTIFACT_SCOPE,
+		scope: scope,
+		value: value
+	})
+}
+
+export const toggleArtifactGraphHierarchy = () => {
+	return ({
+		type: TOGGLE_ARTIFACT_GRAPH_HIERARCHY
 	})
 }
 

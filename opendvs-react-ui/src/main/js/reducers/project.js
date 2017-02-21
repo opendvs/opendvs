@@ -1,5 +1,5 @@
 import {
-  TOGGLE_ARTIFACT_GROUP, REQUEST_PROJECT, RECEIVE_PROJECT, REQUEST_ARTIFACTS, RECEIVE_ARTIFACTS, REQUEST_ARTIFACT, RECEIVE_ARTIFACT, PAGE_COMPONENTS, SELECT_COMPONENT_PAGE, TOGGLE_COMPONENT_DIALOG, ARTIFACT_UPLOADED
+  TOGGLE_ARTIFACT_GRAPH_HIERARCHY, TOGGLE_ARTIFACT_SCOPE, TOGGLE_ARTIFACT_GROUP, REQUEST_PROJECT, RECEIVE_PROJECT, REQUEST_ARTIFACTS, RECEIVE_ARTIFACTS, REQUEST_ARTIFACT, RECEIVE_ARTIFACT, PAGE_COMPONENTS, SELECT_COMPONENT_PAGE, TOGGLE_COMPONENT_DIALOG, ARTIFACT_UPLOADED
 } from '../actions/project'
 import { PAGE_SIZE } from '../config.js'
 
@@ -10,7 +10,9 @@ const project = (state = {
 	  isFetchingArtifactDetail: true,
 	  artifacts: [],
 	  unselectedGroups: [],
+	  unselectedScopes: [],
 	  selectedArtifact: {},
+	  graphHierarchy: true,
       pagedComponents: [],
 	  page: { current: 1, size: PAGE_SIZE },
 	  componentDialog: {open: false, component: {}, state: undefined, version: undefined}
@@ -102,6 +104,25 @@ const project = (state = {
 		        ...state,
 		        unselectedGroups: groups
 		      }
+	    case TOGGLE_ARTIFACT_SCOPE:
+	    	  var scopes = state.unselectedScopes.slice(0);
+    		  var index = scopes.indexOf(action.scope);
+
+	    	  if (action.value && index != -1) {
+	    		  scopes.splice(index,1);
+	    	  } else if (!action.value && index == -1){
+	    		  scopes.push(action.scope);
+	    	  }
+
+		      return {
+		        ...state,
+		        unselectedScopes: scopes
+		      }
+	      case TOGGLE_ARTIFACT_GRAPH_HIERARCHY:
+	    	  return {
+	    	  	...state,
+	    	  	graphHierarchy: !state.graphHierarchy
+	      	  }
 	    default:
 	      return state
 	  }
