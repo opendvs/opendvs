@@ -35,6 +35,7 @@
     "material-ui-number-input": "*",
     "react-material-icons": "*",
     "react-tap-event-plugin": "*",
+    "react-graph-vis": "*",
     "jsog": "^1.0.2",
     "react-flexbox-grid": "*",
     "babel-polyfill": "*",

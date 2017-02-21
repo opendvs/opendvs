@@ -16,6 +16,7 @@ export const UPDATE_PROJECT_ADD_FORM_FIELD = 'UPDATE_PROJECT_ADD_FORM_FIELD'
 export const CREATE_PROJECT_REQUEST = 'CREATE_PROJECT_REQUEST'
 export const CREATE_PROJECT = 'CREATE_PROJECT'
 
+export const TOGGLE_ARTIFACT_GROUP = 'TOGGLE_ARTIFACT_GROUP'
 export const REQUEST_PROJECT = 'REQUEST_PROJECT'
 export const RECEIVE_PROJECT = 'RECEIVE_PROJECT'
 export const REQUEST_ARTIFACTS = 'REQUEST_ARTIFACTS'
@@ -144,6 +145,14 @@ export const selectProjectType = (type) => {
 	})
 }
 
+export const toggleArtifactGroup = (group, value) => {
+	return ({
+		type: TOGGLE_ARTIFACT_GROUP,
+		group: group,
+		value: value
+	})
+}
+
 export const updateFormField = (field, value) => {
 	return ({
 		type: UPDATE_PROJECT_ADD_FORM_FIELD,
@@ -175,7 +184,7 @@ export const createProjectRequested = (project) => {
 	})
 }
 
-export const createNewProject = (project) => (dispatch, state) => {
+export const createNewProject = (project) => (dispatch) => {
 	return fetch(`${API_URL}/projects`, {
 	  method: 'POST',
 	  headers: {
@@ -213,6 +222,7 @@ export const selectArtifact = (projectId, artId) => (dispatch) => {
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
+    	data.raw_components = data.components;
     	// TODO: move to separate field to be able to draw component graph in the future
     	data.components = removeDuplicateUIDs(data.components);
     	data.components.sort((a,b) => a.name.localeCompare(b.name));

@@ -3,6 +3,7 @@ import CircularProgress from 'material-ui/CircularProgress';
 import Divider from 'material-ui/Divider';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
+import EditorShowChart from 'material-ui/svg-icons/editor/show-chart';
 import { Legend, PieChart, Tooltip, Pie, Sector, Cell } from 'recharts'
 import { Grid, Row, Col } from 'react-flexbox-grid/lib/index'
 import ComponentVersionDialog from '../component/ComponentVersionDialog'
@@ -10,6 +11,7 @@ import { fetchProject, selectArtifact, pageComponents, selectComponentPage, open
 import ArtifactSelect from './ArtifactSelect'
 import ArtifactComponentTable from './ArtifactComponentTable'
 import ArtifactBadge from './ArtifactBadge'
+import { Link } from 'react-router'
 
 export const COMPONENT_STATE_COLORS = {
 		UP_TO_DATE: '#4CAF50',
@@ -38,7 +40,6 @@ class Project extends Component {
 			this.props.dispatch(selectComponentPage(1));
 			this.props.dispatch(selectArtifact(this.props.params.projectId, value));
 	  }
-
 
 	  onPageChange = newPage => {
 	    this.props.dispatch(selectComponentPage(newPage))
@@ -84,7 +85,7 @@ class Project extends Component {
 	    }
 
 	    var gridStyle = {width: "100%"};
-		
+		var graphLink = `/project/${item.id}/graph`;
 		return (
 			<div>
 
@@ -94,6 +95,10 @@ class Project extends Component {
 					<Col xs={6} md={8}>
 						<h1 className="projectname">{icon}Project <i>{item.name}</i></h1>
 						{typeProperties}
+
+				    	<Link to={graphLink}>
+							<EditorShowChart />
+						</Link>
 		          	</Col>
 					<Col xs={5} md={3}>
 						<ArtifactSelect artifacts={artifacts} selectedArtifact={selectedArtifact} onArtifactSelect={this.onArtifactSelect} />

@@ -1,5 +1,5 @@
 import {
-  REQUEST_PROJECT, RECEIVE_PROJECT, REQUEST_ARTIFACTS, RECEIVE_ARTIFACTS, REQUEST_ARTIFACT, RECEIVE_ARTIFACT, PAGE_COMPONENTS, SELECT_COMPONENT_PAGE, TOGGLE_COMPONENT_DIALOG, ARTIFACT_UPLOADED
+  TOGGLE_ARTIFACT_GROUP, REQUEST_PROJECT, RECEIVE_PROJECT, REQUEST_ARTIFACTS, RECEIVE_ARTIFACTS, REQUEST_ARTIFACT, RECEIVE_ARTIFACT, PAGE_COMPONENTS, SELECT_COMPONENT_PAGE, TOGGLE_COMPONENT_DIALOG, ARTIFACT_UPLOADED
 } from '../actions/project'
 import { PAGE_SIZE } from '../config.js'
 
@@ -9,6 +9,7 @@ const project = (state = {
 	  isFetchingArtifacts: true,
 	  isFetchingArtifactDetail: true,
 	  artifacts: [],
+	  unselectedGroups: [],
 	  selectedArtifact: {},
       pagedComponents: [],
 	  page: { current: 1, size: PAGE_SIZE },
@@ -86,6 +87,20 @@ const project = (state = {
 		      return {
 		        ...state,
 		        componentDialog: {open: action.open, component: action.component, version: action.version, state: action.state}
+		      }
+	    case TOGGLE_ARTIFACT_GROUP:
+	    	  var groups = state.unselectedGroups.slice(0);
+    		  var index = groups.indexOf(action.group);
+
+	    	  if (action.value && index != -1) {
+	    		  groups.splice(index,1);
+	    	  } else if (!action.value && index == -1){
+	    		  groups.push(action.group);
+	    	  }
+
+		      return {
+		        ...state,
+		        unselectedGroups: groups
 		      }
 	    default:
 	      return state
