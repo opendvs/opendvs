@@ -25,8 +25,8 @@ const chartColors = [COMPONENT_STATE_COLORS.UP_TO_DATE, COMPONENT_STATE_COLORS.O
 
 class Project extends Component {
 	  componentDidMount() {
-		const { dispatch, params, filteredComponents } = this.props;
-		if (params.projectId) {
+		const { item, dispatch, params, filteredComponents } = this.props;
+		if ((!item || !item.id) && params.projectId) {
 			dispatch(fetchProject(params.projectId))
 		}
 	  }

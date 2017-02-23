@@ -14,8 +14,8 @@ import {COMPONENT_STATE_COLORS} from './Project'
 
 class ProjectGraph extends Component {
 	  componentDidMount() {
-		const { dispatch, params } = this.props;
-		if (!params.item && params.projectId) {
+		const { dispatch, params, item } = this.props;
+		if ((!item || !item.id) && params.projectId) {
 			dispatch(fetchProject(params.projectId))
 		}
 	  }
