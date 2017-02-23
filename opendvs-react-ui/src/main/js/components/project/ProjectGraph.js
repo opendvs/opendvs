@@ -3,6 +3,7 @@ import Divider from 'material-ui/Divider';
 import ArtifactSelect from './ArtifactSelect'
 import NavigationArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
 import { fetchProject, selectArtifact, toggleArtifactGroup, toggleArtifactScope, toggleArtifactGraphHierarchy } from '../../actions/project'
+import Checkbox from 'material-ui/Checkbox';
 import Toggle from 'material-ui/Toggle';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
@@ -69,10 +70,12 @@ class ProjectGraph extends Component {
   		    graph.edges = components.filter((entry) => entry.parentId != null).map((entry) => ({from: entry.parentId, to: entry.id}));
 
 			var groups = [...new Set(selectedArtifact.raw_components.map(entry => entry.group))];
-			toggles = groups.map(group => <div key={group} style={toggleBlockStyle}><Toggle onToggle={(event, val) => this.onGroupToggle(group, val)} label={group} toggled={!unselectedGroups.includes(group)} /></div>);
+			groups.sort();
+			toggles = groups.map(group => <div key={group} style={toggleBlockStyle}><Checkbox onCheck={(event, val) => this.onGroupToggle(group, val)} label={group} checked={!unselectedGroups.includes(group)} /></div>);
 
 			var scopes = [...new Set(selectedArtifact.raw_components.map(entry => entry.scope))];
-			scopeToggles = scopes.map(scope => <div key={scope} style={toggleBlockStyle}><Toggle onToggle={(event, val) => this.onScopeToggle(scope, val)} label={(scope)? scope: 'Undefined'} toggled={!unselectedScopes.includes(scope)} /></div>);
+			scopes.sort((a, b) => a === null ? 1 : b === null ? -1 : a.localeCompare(b));
+			scopeToggles = scopes.map(scope => <div key={scope} style={toggleBlockStyle}><Checkbox onCheck={(event, val) => this.onScopeToggle(scope, val)} label={(scope)? scope: 'Undefined'} checked={!unselectedScopes.includes(scope)} /></div>);
 			
 		}
 
@@ -98,7 +101,7 @@ class ProjectGraph extends Component {
 				          }
 				    },
 				    physics: {
-				    	enabled: false
+				    	enabled: !graphHierarchy
 				    },
 				    edges: {
 				        color: {inherit: true},

@@ -270,11 +270,16 @@ export const selectComponentPage = (newPage) => ({
 
 export const pageComponents = () => (dispatch, getState) => {
 	var selectedArtifact = getState().project.selectedArtifact;
+	var unselectedGroups = getState().project.unselectedGroups;
+	var unselectedScopes = getState().project.unselectedScopes;
+
 	var page = getState().project.page;
 
 	if (selectedArtifact && selectedArtifact.components) {
+		const comps = selectedArtifact.components.filter((entry) => !unselectedGroups.includes(entry.group) && !unselectedScopes.includes(entry.scope))
+
 		var offset = (page.current - 1) * page.size
-		var components = selectedArtifact.components.slice(offset, offset + page.size);
+		var components = comps.slice(offset, offset + page.size);
 		dispatch(receivePagedComponents(components));
 	}
 }	
@@ -339,7 +344,7 @@ const removeDuplicateUIDs = (components) => {
 	  var newarr = [];
 	  for (var i in components) {
 		  var obj = components[i];
-		  var k = obj.group + "|" + obj.name + "|" + obj.version;
+		  var k = obj.group + "|" + obj.name + "|" + obj.version + "|" + obj.scope;
 		  if (!(k in keys)) {
 			  keys[k] = [];
 		  }

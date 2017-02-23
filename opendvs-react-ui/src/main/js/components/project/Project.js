@@ -7,8 +7,9 @@ import EditorShowChart from 'material-ui/svg-icons/editor/show-chart';
 import { Legend, PieChart, Tooltip, Pie, Sector, Cell } from 'recharts'
 import { Grid, Row, Col } from 'react-flexbox-grid/lib/index'
 import ComponentVersionDialog from '../component/ComponentVersionDialog'
-import { fetchProject, selectArtifact, pageComponents, selectComponentPage, openComponentDialog, toggleComponentDialog, uploadArtifact } from '../../actions/project'
+import { fetchProject, selectArtifact, pageComponents, selectComponentPage, openComponentDialog, toggleComponentDialog, uploadArtifact, toggleArtifactGroup, toggleArtifactScope } from '../../actions/project'
 import ArtifactSelect from './ArtifactSelect'
+import Checkbox from 'material-ui/Checkbox';
 import ArtifactComponentTable from './ArtifactComponentTable'
 import ArtifactBadge from './ArtifactBadge'
 import { Link } from 'react-router'
@@ -41,6 +42,14 @@ class Project extends Component {
 			this.props.dispatch(selectArtifact(this.props.params.projectId, value));
 	  }
 
+	  onScopeToggle = (scope, value) => {
+		  this.props.dispatch(toggleArtifactScope(scope, value));
+	  }
+
+	  onGroupToggle = (group, value) => {
+		  this.props.dispatch(toggleArtifactGroup(group, value))
+	  }
+
 	  onPageChange = newPage => {
 	    this.props.dispatch(selectComponentPage(newPage))
 	  }
@@ -63,7 +72,7 @@ class Project extends Component {
 	  }
 
 	render() {
-		const { item, artifacts, selectedArtifact, pagedComponents, page, componentDialog } = this.props
+		const { item, artifacts, selectedArtifact, pagedComponents, page, componentDialog,  unselectedGroups, unselectedScopes } = this.props
 
 		var icon = '';
 	    var typeProperties = [];
@@ -83,6 +92,24 @@ class Project extends Component {
 		if (selectedArtifact.state && selectedArtifact.state != 'FINISHED') {
 	 	   icon = <CircularProgress style={{"marginRight": "10px"}} size={25}/>
 	    }
+
+		const toggleBlockStyle = {
+			margin: '10px'
+		};
+
+		var toggles = [];
+		var scopeToggles = [];
+
+		if (selectedArtifact && selectedArtifact.raw_components) {
+			var groups = [...new Set(selectedArtifact.raw_components.map(entry => entry.group))];
+			groups.sort();
+			toggles = groups.map(group => <div key={group} style={toggleBlockStyle}><Checkbox onCheck={(event, val) => this.onGroupToggle(group, val)} label={group} checked={!unselectedGroups.includes(group)} /></div>);
+
+			var scopes = [...new Set(selectedArtifact.raw_components.map(entry => entry.scope))];
+			scopes.sort((a, b) => a === null ? 1 : b === null ? -1 : a.localeCompare(b));
+			console.log(scopes);
+			scopeToggles = scopes.map(scope => <div key={scope} style={toggleBlockStyle}><Checkbox onCheck={(event, val) => this.onScopeToggle(scope, val)} label={(scope)? scope: 'Undefined'} checked={!unselectedScopes.includes(scope)} /></div>);
+		}
 
 	    var gridStyle = {width: "100%"};
 		var graphLink = `/project/${item.id}/graph`;
@@ -104,6 +131,15 @@ class Project extends Component {
 						<ArtifactSelect artifacts={artifacts} selectedArtifact={selectedArtifact} onArtifactSelect={this.onArtifactSelect} />
 		          	</Col>
 						{uploadButton}
+		        </Row>
+		        <Row>
+		          {toggles}
+		        </Row>
+		        <Row>
+		          <Divider />
+		        </Row>
+		        <Row>
+		          {scopeToggles}
 		        </Row>
 		        <Row>
 		          <Divider />
