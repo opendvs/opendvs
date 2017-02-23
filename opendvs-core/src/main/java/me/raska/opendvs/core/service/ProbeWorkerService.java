@@ -87,7 +87,8 @@ public class ProbeWorkerService {
         probeActionRepository.save(act);
         artifactComponentRepository.save(components);
 
-        // Send message to Fanout, but only outside transactional context -> in parent method
+        // Send message to Fanout, but only outside transactional context -> in
+        // parent method
 
         // since artifact change occured
         ResolverAction resact = new ResolverAction();
@@ -95,6 +96,12 @@ public class ProbeWorkerService {
         set.add(art.getId());
         resact.setArtifacts(set);
         return resact; // jump out of transactional context
+    }
+
+    public void failProbeAction(ProbeAction action) {
+        action.setState(ProbeAction.State.FAILURE);
+        action.getArtifact().setState(Artifact.State.FINISHED);
+        probeActionRepository.save(action);
     }
 
 }

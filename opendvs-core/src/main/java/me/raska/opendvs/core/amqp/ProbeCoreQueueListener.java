@@ -37,7 +37,7 @@ public class ProbeCoreQueueListener {
             art.setState(Artifact.State.RESOLVING); // avoid concurrency issues
             fanoutTemplate.convertAndSend(new ArtifactUpdateEvent(art, null));
         } catch (Exception e) {
-            System.out.println("Caught exception");
+            probeService.failProbeAction(action);
             throw new AmqpRejectAndDontRequeueException(e);
         }
     }

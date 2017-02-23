@@ -1,11 +1,13 @@
 package me.raska.opendvs.worker.probe;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +37,10 @@ import me.raska.opendvs.base.probe.ProbingContext;
 import me.raska.opendvs.base.util.Util;
 
 public class MavenProbe implements NativeProbe {
+    private static final String GROUP_NAME = "maven";
+    private static final String DEFAULT_SCOPE = "runtime";
+    private static final String SEPARATOR = ":";
+
     private static final Logger logger = LoggerFactory.getLogger(MavenProbe.class);
 
     // TODO: load from context
@@ -50,17 +56,18 @@ public class MavenProbe implements NativeProbe {
         return "pom.xml".equals(f.getName());
     }
 
-    private Model getEffectivePomModel(File pom) throws IOException, XmlPullParserException {
+    private Model getPomModel(File pom) throws IOException, XmlPullParserException {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         return reader.read(new FileReader(pom));
     }
 
-    private File generateEffectivePom(File pom) throws IOException, MavenInvocationException {
-        File effectivePom = Files.createTempFile(null, ".pom").toFile();
-        effectivePom.deleteOnExit();
+    private File generateDependencyFile(File pom) throws IOException, MavenInvocationException {
+        File tempfile = Files.createTempFile(null, ".pom").toFile();
+        tempfile.deleteOnExit();
         InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(pom);
-        request.setGoals(Arrays.asList("help:effective-pom", "-Doutput=" + effectivePom.getAbsolutePath()));
+        request.setGoals(
+                Arrays.asList("dependency:tree", "-DoutputType=tgf", "-DoutputFile=" + tempfile.getAbsolutePath()));
 
         Invoker inv = new DefaultInvoker();
         inv.setMavenHome(new File(mavenHome));
@@ -72,68 +79,154 @@ public class MavenProbe implements NativeProbe {
             throw new MavenInvocationException(
                     "Cannot build effective pom, execution returned exit code " + res.getExitCode());
         }
-        return effectivePom;
+        return tempfile;
     }
 
-    private List<ArtifactComponent> getMavenComponents(File f, ArtifactComponent parentComponent)
+    private List<ArtifactComponent> handlePomDependencies(File pom, ArtifactComponent parentComponent)
             throws IOException, XmlPullParserException {
         final List<ArtifactComponent> components = new ArrayList<>();
-
-        File effectivePom;
-        try {
-            effectivePom = generateEffectivePom(f);
-        } catch (IOException | MavenInvocationException e) {
-            logger.warn("Cannot build effective pom for " + f.getAbsolutePath(), e);
-            // fallback to regular pom
-            effectivePom = f;
-        }
-
-        final Model model = getEffectivePomModel(effectivePom);
-        final boolean isEffective = f != effectivePom;
+        final Model model = getPomModel(pom);
 
         final ArtifactComponent parentc = new ArtifactComponent();
         parentc.setId(UUID.randomUUID().toString());
-        parentc.setGroup("maven");
+        parentc.setGroup(GROUP_NAME);
         parentc.setVersion(model.getVersion());
-        parentc.setName(model.getGroupId() + ":" + model.getArtifactId());
-        parentc.setUid("maven:" + parentc.getName() + ":" + parentc.getVersion());
+        parentc.setName(model.getGroupId() + SEPARATOR + model.getArtifactId());
+        parentc.setUid(GROUP_NAME + SEPARATOR + parentc.getName() + SEPARATOR + parentc.getVersion());
         parentc.setParentId((parentComponent != null) ? parentComponent.getId() : null);
-        parentc.setScope("runtime");
+        parentc.setScope(DEFAULT_SCOPE);
         components.add(parentc);
 
         Map<String, String> properties = mapMavenProperties(model);
         for (Dependency dep : model.getDependencies()) {
             final ArtifactComponent c = new ArtifactComponent();
             c.setId(UUID.randomUUID().toString());
-            c.setScope((dep.getScope() == null) ? "runtime" : dep.getScope());
-            c.setGroup("maven");
+            c.setScope((dep.getScope() == null) ? DEFAULT_SCOPE : dep.getScope());
+            c.setGroup(GROUP_NAME);
 
             String version = dep.getVersion();
-            if (!isEffective && version != null) {
+            if (version != null)  {
                 // replace all unresolved properties with this nasty hack
                 for (Entry<String, String> entry : properties.entrySet()) {
                     version = version.replace(entry.getKey(), entry.getValue());
                 }
+                c.setVersion(version);
             }
-            c.setVersion(version);
-            c.setName(dep.getGroupId() + ":" + dep.getArtifactId());
-            c.setUid("maven:" + c.getName() + ":" + c.getVersion());
+
+            c.setName(dep.getGroupId() + SEPARATOR + dep.getArtifactId());
+            c.setUid(GROUP_NAME + SEPARATOR + c.getName() + SEPARATOR + c.getVersion());
             c.setParentId(parentc.getId());
             components.add(c);
         }
 
-        if (isEffective) { // delete the file
-            effectivePom.delete();
+        return components;
+    }
+
+    /**
+     * Handle TGF format vertex as defined by 'id<spacing>name'.
+     * 
+     * @param line
+     *            line with vertex
+     * @param componentsMap
+     *            Map to be mutated with id => name mapping
+     */
+    private void handleTGFVertex(String line, Map<String, ArtifactComponent> componentsMap, String parentComponentId) {
+        final String[] parsed = line.split(" ", 2);
+        if (parsed.length != 2) {
+            logger.warn("Cannot properly parse TGF vertex line '{}'", line);
+            return;
         }
+
+        final String[] componentData = parsed[1].split(SEPARATOR);
+        if (componentData.length < 4) {
+            logger.warn("Cannot parse Maven artifact name from TGF vertex line '{}'", line);
+            return;
+        }
+
+        final ArtifactComponent component = new ArtifactComponent();
+        component.setId(UUID.randomUUID().toString());
+        component.setGroup(GROUP_NAME);
+        component.setName(componentData[0] + SEPARATOR + componentData[1]);
+        component.setVersion(componentData[3]);
+        // runtime for parent-level
+        component.setScope((componentData.length > 4) ? componentData[4] : DEFAULT_SCOPE);
+        component.setUid(GROUP_NAME + SEPARATOR + component.getName() + SEPARATOR + component.getVersion());
+        component.setParentId(parentComponentId);
+
+        componentsMap.put(parsed[0], component);
+    }
+
+    private void handleTGFEdge(String line, Map<String, ArtifactComponent> componentsMap) {
+        final String[] parsed = line.split(" ");
+        if (parsed.length < 2) {
+            logger.warn("Cannot properly parse TGF edge line '{}'", line);
+            return;
+        }
+
+        final ArtifactComponent source = componentsMap.get(parsed[0]);
+        final ArtifactComponent target = componentsMap.get(parsed[1]);
+
+        if (source == null || target == null) {
+            // TODO: also log artifact details
+            logger.warn("Cannot link TGF edge with source '{}' and parent '{}'", parsed[0], parsed[1]);
+            return;
+        }
+
+        target.setParentId(source.getId());
+    }
+
+    private Collection<ArtifactComponent> handleDependencyTree(File dependencyFile, ArtifactComponent parentComponent)
+            throws IOException {
+        final Map<String, ArtifactComponent> componentsMap = new HashMap<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(dependencyFile))) {
+            boolean edges = false;
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                // if separator is encountered, switch states
+                if (!edges && "#".equals(line)) {
+                    edges = true;
+                    continue;
+                }
+
+                if (edges) {
+                    handleTGFEdge(line, componentsMap);
+                } else {
+                    handleTGFVertex(line, componentsMap, (parentComponent != null) ? parentComponent.getId() : null);
+                }
+            }
+        }
+        return componentsMap.values();
+    }
+
+    private List<ArtifactComponent> getMavenComponents(File pom, ArtifactComponent parentComponent)
+            throws IOException, XmlPullParserException {
+        final List<ArtifactComponent> components = new ArrayList<>();
+
+        File dependencyFile = null;
+        try {
+            dependencyFile = generateDependencyFile(pom);
+        } catch (IOException | MavenInvocationException e) {
+            logger.warn("Cannot build dependency for " + pom.getAbsolutePath(), e);
+            // fallback to regular pom
+        }
+
+        if (dependencyFile == null) {
+            components.addAll(handlePomDependencies(pom, parentComponent));
+        } else {
+            components.addAll(handleDependencyTree(dependencyFile, parentComponent));
+            if (!dependencyFile.delete()) {
+                logger.warn("Cannot delete dependencyFile {}", dependencyFile.getAbsolutePath());
+            }
+        }
+
         return components;
     }
 
     private Map<String, String> mapMavenProperties(Model model) {
         // try the best to replace properties
         Map<String, String> map = new HashMap<>();
-        model.getProperties().forEach((k, v) -> {
-            map.put(String.format("${%s}", k), v.toString());
-        });
+        model.getProperties().forEach((k, v) -> map.put(String.format("${%s}", k), v.toString()));
         if (model.getVersion() != null) {
             map.put("${project.version}", model.getVersion());
         }
