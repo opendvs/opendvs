@@ -25,7 +25,6 @@ export const REQUEST_ARTIFACTS = 'REQUEST_ARTIFACTS'
 export const RECEIVE_ARTIFACTS = 'RECEIVE_ARTIFACTS'
 export const REQUEST_ARTIFACT = 'REQUEST_ARTIFACT'
 export const RECEIVE_ARTIFACT = 'RECEIVE_ARTIFACT'
-export const PAGE_COMPONENTS = 'PAGE_ARTIFACT_COMPONENTS'
 export const SELECT_COMPONENT_PAGE = 'SELECT_ARTIFACT_COMPONENT_PAGE'
 
 export const TOGGLE_COMPONENT_DIALOG = 'TOGGLE_ARTIFACT_COMPONENT_DIALOG'
@@ -243,7 +242,7 @@ export const selectArtifact = (projectId, artId) => (dispatch) => {
     	data.components = removeDuplicateUIDs(data.components);
     	data.components.sort((a,b) => a.name.localeCompare(b.name));
     	dispatch(receiveArtifact(data));
-		dispatch(pageComponents());
+		dispatch(selectComponentPage(1));
     });
 }
 
@@ -266,28 +265,6 @@ const fetchArtifacts = (id) => (dispatch) => {
 export const selectComponentPage = (newPage) => ({	
 	type: SELECT_COMPONENT_PAGE,
 	page: newPage
-})
-
-export const pageComponents = () => (dispatch, getState) => {
-	var selectedArtifact = getState().project.selectedArtifact;
-	var unselectedGroups = getState().project.unselectedGroups;
-	var unselectedScopes = getState().project.unselectedScopes;
-
-	var page = getState().project.page;
-
-	if (selectedArtifact && selectedArtifact.components) {
-		const comps = selectedArtifact.components.filter((entry) => !unselectedGroups.includes(entry.group) && !unselectedScopes.includes(entry.scope))
-
-		var offset = (page.current - 1) * page.size
-		var components = comps.slice(offset, offset + page.size);
-		dispatch(receivePagedComponents(components));
-	}
-}	
-
-
-export const receivePagedComponents = (components) => ({
-	type: PAGE_COMPONENTS,
-	components: components
 })
 
 export const openComponentDialog = (component) => (dispatch) => {
@@ -334,7 +311,7 @@ export const uploadArtifact = (formData, projectId) => (dispatch) => {
 			data.components = removeDuplicateUIDs(data.components);
 	    	data.components.sort((a,b) => a.name.localeCompare(b.name));
 	    	dispatch(receiveArtifact(data));
-			dispatch(pageComponents());
+			dispatch(selectComponentPage(1));
 			dispatch(toggleSnackbar(true, `Artifact ${data.name} was successfully uploaded`));
 		  })
 }

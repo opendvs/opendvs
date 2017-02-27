@@ -69,11 +69,11 @@ class ProjectGraph extends Component {
 			}));
   		    graph.edges = components.filter((entry) => entry.parentId != null).map((entry) => ({from: entry.parentId, to: entry.id}));
 
-			var groups = [...new Set(selectedArtifact.raw_components.map(entry => entry.group))];
+			var groups = [...new Set(selectedArtifact.components.map(entry => entry.group))];
 			groups.sort();
 			toggles = groups.map(group => <div key={group} style={toggleBlockStyle}><Checkbox onCheck={(event, val) => this.onGroupToggle(group, val)} label={group} checked={!unselectedGroups.includes(group)} /></div>);
 
-			var scopes = [...new Set(selectedArtifact.raw_components.map(entry => entry.scope))];
+			var scopes = [...new Set(selectedArtifact.components.filter((entry) => !unselectedGroups.includes(entry.group)).map(entry => entry.scope))];
 			scopes.sort((a, b) => a === null ? 1 : b === null ? -1 : a.localeCompare(b));
 			scopeToggles = scopes.map(scope => <div key={scope} style={toggleBlockStyle}><Checkbox onCheck={(event, val) => this.onScopeToggle(scope, val)} label={(scope)? scope: 'Undefined'} checked={!unselectedScopes.includes(scope)} /></div>);
 			

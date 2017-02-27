@@ -31,6 +31,11 @@ const ArtifactComponentTable = ({ components, page, onPageChange, onComponentCli
     for (let i = start; i <= end; i++) {
 		  pageButtons.push(<FlatButton onClick={() => onPageChange(i)} key={i} secondary={i == page.current}>{i}</FlatButton>)
     }
+    
+    var pageEnd = page.current*page.size;
+    if (pageEnd > page.totalElements) {
+    	pageEnd = page.totalElements;
+    }
 
     if (page.total > 0) {
     	var footer = (
@@ -44,6 +49,7 @@ const ArtifactComponentTable = ({ components, page, onPageChange, onComponentCli
 	              <IconButton disabled={page.current == page.total}  style={{top: 8}} onClick={() => onPageChange(page.current + 1)} >
 	                <ChevronRight/>
 	              </IconButton>
+	              <small style={{float: "right"}}>Components {(page.current-1)*page.size + 1}-{pageEnd}/{page.totalElements}</small>
 	              </TableRowColumn>
 	          </TableRow>
 	        </TableFooter>)

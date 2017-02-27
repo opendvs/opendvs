@@ -7,7 +7,7 @@ import EditorShowChart from 'material-ui/svg-icons/editor/show-chart';
 import { Legend, PieChart, Tooltip, Pie, Sector, Cell } from 'recharts'
 import { Grid, Row, Col } from 'react-flexbox-grid/lib/index'
 import ComponentVersionDialog from '../component/ComponentVersionDialog'
-import { fetchProject, selectArtifact, pageComponents, selectComponentPage, openComponentDialog, toggleComponentDialog, uploadArtifact, toggleArtifactGroup, toggleArtifactScope } from '../../actions/project'
+import { fetchProject, selectArtifact, selectComponentPage, openComponentDialog, toggleComponentDialog, uploadArtifact, toggleArtifactGroup, toggleArtifactScope } from '../../actions/project'
 import ArtifactSelect from './ArtifactSelect'
 import Checkbox from 'material-ui/Checkbox';
 import ArtifactComponentTable from './ArtifactComponentTable'
@@ -25,20 +25,13 @@ const chartColors = [COMPONENT_STATE_COLORS.UP_TO_DATE, COMPONENT_STATE_COLORS.O
 
 class Project extends Component {
 	  componentDidMount() {
-		const { item, dispatch, params, filteredComponents } = this.props;
+		const { item, dispatch, params } = this.props;
 		if ((!item || !item.id) && params.projectId) {
 			dispatch(fetchProject(params.projectId))
 		}
 	  }
 
-	  componentWillReceiveProps(nextProps) {
-		  if (this.props.page.current != nextProps.page.current) {
-			  this.props.dispatch(pageComponents())
-	  	  }
-	  }
-
 	  onArtifactSelect = (event, index, value) => {
-			this.props.dispatch(selectComponentPage(1));
 			this.props.dispatch(selectArtifact(this.props.params.projectId, value));
 	  }
 
@@ -72,7 +65,7 @@ class Project extends Component {
 	  }
 
 	render() {
-		const { item, artifacts, selectedArtifact, pagedComponents, page, componentDialog,  unselectedGroups, unselectedScopes } = this.props
+		const { item, artifacts, selectedArtifact, page, componentDialog,  unselectedGroups, unselectedScopes } = this.props
 
 		var icon = '';
 	    var typeProperties = [];
@@ -99,15 +92,30 @@ class Project extends Component {
 
 		var toggles = [];
 		var scopeToggles = [];
+		var raw_components = [];
+		var pagedComponents = [];
+		var pagedPage = {};
 
 		if (selectedArtifact && selectedArtifact.raw_components) {
-			var groups = [...new Set(selectedArtifact.raw_components.map(entry => entry.group))];
+			// page the details
+			raw_components = selectedArtifact.raw_components.filter((entry) => !unselectedGroups.includes(entry.group) && !unselectedScopes.includes(entry.scope));
+			var components = selectedArtifact.components.filter((entry) => !unselectedGroups.includes(entry.group) && !unselectedScopes.includes(entry.scope));
+
+            // recalculate page
+            pagedPage = { current: page.current, size: page.size, total: Math.ceil(components.length/page.size), totalElements: components.length };
+
+            var offset = (pagedPage.current - 1) * pagedPage.size;
+            pagedComponents = components.slice(offset, offset + page.size);
+            
+
+
+			// calculate groups / scopes
+			var groups = [...new Set(selectedArtifact.components.map(entry => entry.group))];
 			groups.sort();
 			toggles = groups.map(group => <div key={group} style={toggleBlockStyle}><Checkbox onCheck={(event, val) => this.onGroupToggle(group, val)} label={group} checked={!unselectedGroups.includes(group)} /></div>);
 
-			var scopes = [...new Set(selectedArtifact.raw_components.map(entry => entry.scope))];
+			var scopes = [...new Set(selectedArtifact.components.filter((entry) => !unselectedGroups.includes(entry.group)).map(entry => entry.scope))];
 			scopes.sort((a, b) => a === null ? 1 : b === null ? -1 : a.localeCompare(b));
-			console.log(scopes);
 			scopeToggles = scopes.map(scope => <div key={scope} style={toggleBlockStyle}><Checkbox onCheck={(event, val) => this.onScopeToggle(scope, val)} label={(scope)? scope: 'Undefined'} checked={!unselectedScopes.includes(scope)} /></div>);
 		}
 
@@ -146,11 +154,11 @@ class Project extends Component {
 		        </Row>
 		        <Row>
 					<Col xs={6} md={8}>
-						<ArtifactComponentTable components={pagedComponents} page={page} onPageChange={this.onPageChange} onComponentClick={this.onComponentClick} />
+						<ArtifactComponentTable components={pagedComponents} page={pagedPage} onPageChange={this.onPageChange} onComponentClick={this.onComponentClick} />
 					</Col>
 		
 					<Col xs={6} md={4}>
-						<ArtifactBadge artifact={selectedArtifact} components={selectedArtifact.components} /> 
+						<ArtifactBadge artifact={selectedArtifact} components={raw_components} /> 
 			        </Col>
 		        </Row>
 		    </Grid>

@@ -13,7 +13,6 @@ const project = (state = {
 	  unselectedScopes: [],
 	  selectedArtifact: {},
 	  graphHierarchy: true,
-      pagedComponents: [],
 	  page: { current: 1, size: PAGE_SIZE },
 	  componentDialog: {open: false, component: {}, state: undefined, version: undefined}
 	}, action) => {
@@ -23,8 +22,7 @@ const project = (state = {
 	        ...state,
 	        isFetchingProject: true,
 	        artifacts: [],
-	        selectedArtifact: {},
-	        pagedComponents: []
+	        selectedArtifact: {}
 	      }
 
 	    case RECEIVE_PROJECT:
@@ -38,8 +36,7 @@ const project = (state = {
 		      return {
 		        ...state,
 		        isFetchingArtifactDetail: true,
-		        selectedArtifact: {},
-		        pagedComponents: []
+		        selectedArtifact: {}
 		      }
 
 	    case RECEIVE_ARTIFACT:
@@ -71,11 +68,6 @@ const project = (state = {
 	      return {
 	    	...state,
 	    	artifacts: artifacts
-	      }
-	    case PAGE_COMPONENTS:
-	      return {
-	        ...state,
-	        pagedComponents: action.components
 	      }
 
 	    case SELECT_COMPONENT_PAGE:
