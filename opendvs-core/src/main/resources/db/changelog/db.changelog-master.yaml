@@ -1,47 +1,32 @@
 databaseChangeLog:
 - changeSet:
-    id: 1492863998374-1
+    id: 1492881709431-1
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: id
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: identity
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: name
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: source_type
             type: VARCHAR(255)
         - column:
             name: type
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: uri
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: project_id
             type: VARCHAR(255)
         - column:
@@ -52,30 +37,24 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: artifact
 - changeSet:
-    id: 1492863998374-2
+    id: 1492881709431-2
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: id
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: artifact_group
             type: VARCHAR(255)
         - column:
             name: artifact_hash
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: name
             type: VARCHAR(255)
         - column:
@@ -88,24 +67,15 @@ databaseChangeLog:
             name: state
             type: INT
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: uid
             type: VARCHAR(255)
         - column:
             name: version
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: artifact_id
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: probe_action_step_id
             type: VARCHAR(255)
         - column:
@@ -113,43 +83,54 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: artifact_component
 - changeSet:
-    id: 1492863998374-3
+    id: 1492881709431-3
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
-            name: id
+              nullable: false
+            name: artifact_component_id
             type: VARCHAR(255)
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            name: vulnerabilities_id
+            type: VARCHAR(255)
+        tableName: artifact_component_vulnerabilities
+- changeSet:
+    id: 1492881709431-4
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            defaultValue: ''
+            name: id
+            type: VARCHAR(255)
+        - column:
             name: component_group
             type: VARCHAR(255)
         - column:
             name: latest_version
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: name
             type: VARCHAR(255)
         tableName: component
 - changeSet:
-    id: 1492863998374-4
+    id: 1492881709431-5
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: id
             type: VARCHAR(255)
         - column:
@@ -162,15 +143,9 @@ databaseChangeLog:
             name: published
             type: datetime(6)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: source
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: synced
             type: datetime(6)
         - column:
@@ -181,15 +156,15 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: component_version
 - changeSet:
-    id: 1492863998374-5
+    id: 1492881709431-6
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: id
             type: VARCHAR(255)
         - column:
@@ -212,15 +187,15 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: poller_action
 - changeSet:
-    id: 1492863998374-6
+    id: 1492881709431-7
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: id
             type: VARCHAR(255)
         - column:
@@ -233,9 +208,6 @@ databaseChangeLog:
             name: type
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: poller_action_id
             type: VARCHAR(255)
         - column:
@@ -249,21 +221,18 @@ databaseChangeLog:
             type: datetime(6)
         tableName: poller_action_step
 - changeSet:
-    id: 1492863998374-7
+    id: 1492881709431-8
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: id
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: debug
             type: BIT(1)
         - column:
@@ -273,9 +242,6 @@ databaseChangeLog:
             name: initiated
             type: datetime(6)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: max_iterations
             type: BIGINT
         - column:
@@ -285,22 +251,19 @@ databaseChangeLog:
             name: state
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: artifact_id
             type: VARCHAR(255)
         tableName: probe_action
 - changeSet:
-    id: 1492863998374-8
+    id: 1492881709431-9
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: id
             type: VARCHAR(255)
         - column:
@@ -313,53 +276,41 @@ databaseChangeLog:
             name: type
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: probe_action_id
             type: VARCHAR(255)
         tableName: probe_action_step
 - changeSet:
-    id: 1492863998374-9
+    id: 1492881709431-10
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: id
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: name
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: type
             type: VARCHAR(255)
         - column:
-            constraints:
-              constraints:
-                nullable: false
             name: major_version_offset
             type: INT
         tableName: project
 - changeSet:
-    id: 1492863998374-10
+    id: 1492881709431-11
     author: raskaluk (generated)
     changes:
     - createTable:
         columns:
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: project_id
             type: VARCHAR(255)
         - column:
@@ -367,13 +318,85 @@ databaseChangeLog:
             type: VARCHAR(255)
         - column:
             constraints:
-              constraints:
-                nullable: false
+              nullable: false
+            defaultValue: ''
             name: type_properties_key
             type: VARCHAR(255)
         tableName: project_type_properties
 - changeSet:
-    id: 1492863998374-11
+    id: 1492881709431-12
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: description
+            type: LONGTEXT
+        - column:
+            name: published
+            type: datetime(6)
+        - column:
+            constraints:
+              nullable: false
+            name: score
+            type: DOUBLE
+        - column:
+            name: severity
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: source
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: synced
+            type: datetime(6)
+        - column:
+            name: updated
+            type: datetime(6)
+        - column:
+            name: vector
+            type: VARCHAR(255)
+        tableName: vulnerability
+- changeSet:
+    id: 1492881709431-13
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: vulnerability_id
+            type: VARCHAR(255)
+        - column:
+            name: products
+            type: VARCHAR(255)
+        tableName: vulnerability_products
+- changeSet:
+    id: 1492881709431-14
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: vulnerability_id
+            type: VARCHAR(255)
+        - column:
+            name: refs
+            type: VARCHAR(255)
+        tableName: vulnerability_refs
+- changeSet:
+    id: 1492881709431-15
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -381,7 +404,7 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: artifact
 - changeSet:
-    id: 1492863998374-12
+    id: 1492881709431-16
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -389,7 +412,7 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: artifact_component
 - changeSet:
-    id: 1492863998374-13
+    id: 1492881709431-17
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -397,7 +420,7 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: component
 - changeSet:
-    id: 1492863998374-14
+    id: 1492881709431-18
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -405,7 +428,7 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: component_version
 - changeSet:
-    id: 1492863998374-15
+    id: 1492881709431-19
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -413,7 +436,7 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: poller_action
 - changeSet:
-    id: 1492863998374-16
+    id: 1492881709431-20
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -421,7 +444,7 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: poller_action_step
 - changeSet:
-    id: 1492863998374-17
+    id: 1492881709431-21
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -429,7 +452,7 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: probe_action
 - changeSet:
-    id: 1492863998374-18
+    id: 1492881709431-22
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -437,7 +460,7 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: probe_action_step
 - changeSet:
-    id: 1492863998374-19
+    id: 1492881709431-23
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -445,7 +468,7 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: project
 - changeSet:
-    id: 1492863998374-20
+    id: 1492881709431-24
     author: raskaluk (generated)
     changes:
     - addPrimaryKey:
@@ -453,7 +476,15 @@ databaseChangeLog:
         constraintName: PRIMARY
         tableName: project_type_properties
 - changeSet:
-    id: 1492863998374-21
+    id: 1492881709431-25
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: vulnerability
+- changeSet:
+    id: 1492881709431-26
     author: raskaluk (generated)
     changes:
     - addUniqueConstraint:
@@ -461,7 +492,7 @@ databaseChangeLog:
         constraintName: UK_h6s6tl07bkl61k0npe124nbi4
         tableName: probe_action
 - changeSet:
-    id: 1492863998374-22
+    id: 1492881709431-27
     author: raskaluk (generated)
     changes:
     - addUniqueConstraint:
@@ -469,7 +500,7 @@ databaseChangeLog:
         constraintName: UKa7vsyndbn0wocw2y9lkcmxri
         tableName: artifact
 - changeSet:
-    id: 1492863998374-23
+    id: 1492881709431-28
     author: raskaluk (generated)
     changes:
     - addUniqueConstraint:
@@ -477,7 +508,7 @@ databaseChangeLog:
         constraintName: UKddyyrpuc9yvdihrpinme1i8t3
         tableName: component
 - changeSet:
-    id: 1492863998374-24
+    id: 1492881709431-29
     author: raskaluk (generated)
     changes:
     - createIndex:
@@ -487,7 +518,37 @@ databaseChangeLog:
         indexName: FKaogl3nainqf1uikj7fawwb1dr
         tableName: poller_action_step
 - changeSet:
-    id: 1492863998374-25
+    id: 1492881709431-30
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: artifact_component_id
+        indexName: FKb7ucmc011j7lx07yui3g5bdo1
+        tableName: artifact_component_vulnerabilities
+- changeSet:
+    id: 1492881709431-31
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: vulnerabilities_id
+        indexName: FKcwjwicdxwolsjr2hti5j0iaa7
+        tableName: artifact_component_vulnerabilities
+- changeSet:
+    id: 1492881709431-32
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: vulnerability_id
+        indexName: FKddb41m2m2w772ds4gv06sohgb
+        tableName: vulnerability_refs
+- changeSet:
+    id: 1492881709431-33
     author: raskaluk (generated)
     changes:
     - createIndex:
@@ -497,7 +558,7 @@ databaseChangeLog:
         indexName: FKfj7ymgeu6ss8g1nlx4xog1h01
         tableName: component_version
 - changeSet:
-    id: 1492863998374-26
+    id: 1492881709431-34
     author: raskaluk (generated)
     changes:
     - createIndex:
@@ -507,7 +568,7 @@ databaseChangeLog:
         indexName: FKsjov8fw9bnr0et2g94day0ej3
         tableName: probe_action_step
 - changeSet:
-    id: 1492863998374-27
+    id: 1492881709431-35
     author: raskaluk (generated)
     changes:
     - createIndex:
@@ -517,7 +578,17 @@ databaseChangeLog:
         indexName: FKsx567dhvlgqci1dr2pshudr80
         tableName: artifact_component
 - changeSet:
-    id: 1492863998374-28
+    id: 1492881709431-36
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: vulnerability_id
+        indexName: FKsyva9uwllmfqxh95bff34lha1
+        tableName: vulnerability_products
+- changeSet:
+    id: 1492881709431-37
     author: raskaluk (generated)
     changes:
     - createIndex:
@@ -527,7 +598,7 @@ databaseChangeLog:
         indexName: FKt4nqbjchsn72u2rv6o9cxwkbi
         tableName: artifact_component
 - changeSet:
-    id: 1492863998374-29
+    id: 1492881709431-38
     author: raskaluk (generated)
     changes:
     - createIndex:
@@ -537,7 +608,7 @@ databaseChangeLog:
         indexName: IDXn6v3wipbykw9beubrvpe42026
         tableName: artifact_component
 - changeSet:
-    id: 1492863998374-30
+    id: 1492881709431-39
     author: raskaluk (generated)
     changes:
     - addForeignKeyConstraint:
@@ -551,7 +622,7 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: project
 - changeSet:
-    id: 1492863998374-31
+    id: 1492881709431-40
     author: raskaluk (generated)
     changes:
     - addForeignKeyConstraint:
@@ -565,7 +636,49 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: poller_action
 - changeSet:
-    id: 1492863998374-32
+    id: 1492881709431-41
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: artifact_component_id
+        baseTableName: artifact_component_vulnerabilities
+        constraintName: FKb7ucmc011j7lx07yui3g5bdo1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: artifact_component
+- changeSet:
+    id: 1492881709431-42
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: vulnerabilities_id
+        baseTableName: artifact_component_vulnerabilities
+        constraintName: FKcwjwicdxwolsjr2hti5j0iaa7
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: vulnerability
+- changeSet:
+    id: 1492881709431-43
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: vulnerability_id
+        baseTableName: vulnerability_refs
+        constraintName: FKddb41m2m2w772ds4gv06sohgb
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: vulnerability
+- changeSet:
+    id: 1492881709431-44
     author: raskaluk (generated)
     changes:
     - addForeignKeyConstraint:
@@ -579,7 +692,7 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: component
 - changeSet:
-    id: 1492863998374-33
+    id: 1492881709431-45
     author: raskaluk (generated)
     changes:
     - addForeignKeyConstraint:
@@ -593,7 +706,7 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: artifact
 - changeSet:
-    id: 1492863998374-34
+    id: 1492881709431-46
     author: raskaluk (generated)
     changes:
     - addForeignKeyConstraint:
@@ -607,7 +720,7 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: project
 - changeSet:
-    id: 1492863998374-35
+    id: 1492881709431-47
     author: raskaluk (generated)
     changes:
     - addForeignKeyConstraint:
@@ -621,7 +734,7 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: probe_action
 - changeSet:
-    id: 1492863998374-36
+    id: 1492881709431-48
     author: raskaluk (generated)
     changes:
     - addForeignKeyConstraint:
@@ -635,7 +748,21 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: probe_action_step
 - changeSet:
-    id: 1492863998374-37
+    id: 1492881709431-49
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: vulnerability_id
+        baseTableName: vulnerability_products
+        constraintName: FKsyva9uwllmfqxh95bff34lha1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: vulnerability
+- changeSet:
+    id: 1492881709431-50
     author: raskaluk (generated)
     changes:
     - addForeignKeyConstraint:

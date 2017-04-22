@@ -25,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 import me.raska.opendvs.base.core.amqp.CoreRabbitService;
 import me.raska.opendvs.base.core.event.ComponentsResolvedEvent;
 import me.raska.opendvs.base.model.Component;
+import me.raska.opendvs.base.model.ComponentVersion;
+import me.raska.opendvs.base.model.Vulnerability;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.artifact.ArtifactComponent;
 import me.raska.opendvs.base.model.poller.PollerAction;
@@ -34,6 +36,7 @@ import me.raska.opendvs.resolver.dto.ArtifactComponentRepository;
 import me.raska.opendvs.resolver.dto.ArtifactRepository;
 import me.raska.opendvs.resolver.dto.ComponentRepository;
 import me.raska.opendvs.resolver.dto.PollerActionRepository;
+import me.raska.opendvs.resolver.dto.VulnerabilityRepository;
 import me.raska.opendvs.resolver.util.SemanticVersioningUtil;
 
 @Slf4j
@@ -50,6 +53,9 @@ public class ResolverService {
 
     @Autowired
     private PollerActionRepository pollerActionRepository;
+
+    @Autowired
+    private VulnerabilityRepository vulnerabilityRepository;
 
     @Autowired
     @Qualifier(CoreRabbitService.FANOUT_QUALIFIER)
@@ -81,7 +87,25 @@ public class ResolverService {
             }
         }
 
+        if (action.getVulnerabilities() != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Obtained " + action.getVulnerabilities().size() + " vulnerabilities to handle");
+            }
+
+            action.getVulnerabilities().forEach(this::handleVulnerability);
+        }
+
         return rescanningComponents;
+    }
+
+    private void handleVulnerability(String id) {
+        Vulnerability vuln = vulnerabilityRepository.findOne(id);
+        if (vuln == null) {
+            log.error("Obtained vulnerability " + id + " which doesn't exist. Verify transactional context!");
+            return;
+        }
+
+        // TODO
     }
 
     private List<ArtifactComponent> handleInputArtifact(String artifact) {
@@ -104,15 +128,23 @@ public class ResolverService {
             }
 
             Component c = componentRepository.findByNameAndGroup(component.getName(), component.getGroup());
-            ArtifactComponent.State state = SemanticVersioningUtil.checkVersion(component.getVersion(), c,
-                    art.getProject().getMajorVersionOffset());
+
+            // test vulnerability first
+            List<Vulnerability> vulns = checkVulnerability(component.getUid(), component.getVersion());
+            ArtifactComponent.State state = ArtifactComponent.State.VULNERABLE;
+
+            if (vulns.isEmpty()) {
+                state = SemanticVersioningUtil.checkVersion(component.getVersion(), c,
+                        art.getProject().getMajorVersionOffset());
+            }
 
             if (log.isDebugEnabled()) {
                 log.debug("Artifact (" + artifact + ") component " + component.getId() + " is " + state);
             }
 
             component.setState(state);
-            if (state == ArtifactComponent.State.UP_TO_DATE) {
+            component.setVulnerabilities(vulns);
+            if (state == ArtifactComponent.State.UP_TO_DATE || state == ArtifactComponent.State.VULNERABLE) {
                 batchUpdate.add(component);
                 rescanningComponents.add(component); // TODO: allow grace period
                                                      // to be configured
@@ -138,8 +170,8 @@ public class ResolverService {
             for (ArtifactComponent c : entry.getValue()) {
                 PollerAction action = new PollerAction();
                 action.setFilter(c.getGroup() + ":" + c.getName());
-                if (pollerActionRepository.findByFilterAndStateIn(action.getFilter(),
-                        Arrays.asList(PollerAction.State.QUEUED, PollerAction.State.IN_PROGRESS)).size() > 0) {
+                if (!pollerActionRepository.findByFilterAndStateIn(action.getFilter(),
+                        Arrays.asList(PollerAction.State.QUEUED, PollerAction.State.IN_PROGRESS)).isEmpty()) {
                     continue;
                 }
 
@@ -152,6 +184,21 @@ public class ResolverService {
         return actions;
     }
 
+    private List<Vulnerability> checkVulnerability(String uid, String version) {
+        if (version == null) {
+            return Arrays.asList();
+        }
+
+        // TODO: remove hack after unified identifier is determined
+        String[] parsedUid = uid.split(":");
+
+        List<Vulnerability> vulns = vulnerabilityRepository.findByProductMatcher(parsedUid[parsedUid.length - 2], version);
+        if (!vulns.isEmpty()) {
+            log.info("Found " + vulns.size() + " vulnerabilities for " + uid + " with version " + version);
+        }
+        return vulns;
+    }
+
     private void handleInputComponent(String component) {
         Component comp = componentRepository.findOne(component);
         if (comp == null) {
@@ -161,7 +208,8 @@ public class ResolverService {
 
         Pageable page = new PageRequest(0, pageSize);
 
-        Set<String> compVersions = comp.getVersions().stream().map(cv -> cv.getVersion()).collect(Collectors.toSet());
+        Set<String> compVersions = comp.getVersions().stream().map(ComponentVersion::getVersion)
+                .collect(Collectors.toSet());
 
         boolean run = true;
         while (run) {
@@ -192,6 +240,16 @@ public class ResolverService {
             if (log.isDebugEnabled()) {
                 log.debug("Determining state of component " + c.getId() + " due to component " + comp.getId());
             }
+
+            List<Vulnerability> vulns = checkVulnerability(c.getUid(), c.getVersion());
+            if (vulns != null && !vulns.isEmpty()) {
+                c.setVulnerabilities(vulns);
+                c.setState(ArtifactComponent.State.VULNERABLE);
+                batchUpdate.add(c);
+                continue;
+            }
+
+            // not vulnerable as far as we know
             if (c.getState() != ArtifactComponent.State.UP_TO_DATE && c.getVersion() != null
                     && c.getVersion().equals(comp.getLatestVersion())) {
                 if (log.isDebugEnabled()) {

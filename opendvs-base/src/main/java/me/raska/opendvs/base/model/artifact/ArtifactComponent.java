@@ -1,10 +1,15 @@
 package me.raska.opendvs.base.model.artifact;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -16,6 +21,7 @@ import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.raska.opendvs.base.model.Vulnerability;
 import me.raska.opendvs.base.model.probe.ProbeActionStep;
 
 @Getter
@@ -58,6 +64,9 @@ public class ArtifactComponent {
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @ManyToOne(optional = false)
     private ProbeActionStep probeActionStep;
+
+    @ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
+    private List<Vulnerability> vulnerabilities;
 
     private State state;
 

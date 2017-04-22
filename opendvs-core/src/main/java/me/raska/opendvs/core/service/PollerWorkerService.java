@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 import me.raska.opendvs.base.model.Component;
 import me.raska.opendvs.base.model.ComponentVersion;
+import me.raska.opendvs.base.model.Vulnerability;
 import me.raska.opendvs.base.model.poller.PollerAction;
 import me.raska.opendvs.base.model.poller.PollerActionStep;
 import me.raska.opendvs.base.resolver.ResolverAction;
@@ -20,6 +22,7 @@ import me.raska.opendvs.core.dto.ComponentRepository;
 import me.raska.opendvs.core.dto.ComponentVersionRepository;
 import me.raska.opendvs.core.dto.PollerActionRepository;
 import me.raska.opendvs.core.dto.PollerActionStepRepository;
+import me.raska.opendvs.core.dto.VulnerabilityRepository;
 
 @Slf4j
 @Service
@@ -37,11 +40,15 @@ public class PollerWorkerService {
     @Autowired
     private ComponentVersionRepository componentVersionRepository;
 
+    @Autowired
+    private VulnerabilityRepository vulnerabilityRepository;
+
     @Transactional
     public List<ResolverAction> process(PollerAction action) {
         PollerAction act = pollerActionRepository.findOne(action.getId());
         if (act == null) {
-            throw new RuntimeException("Cannot find PollerAction " + action.getId() + ", ensure it's not transactional issue!");
+            throw new RuntimeException(
+                    "Cannot find PollerAction " + action.getId() + ", ensure it's not transactional issue!");
         }
 
         List<ResolverAction> resolverActions = new ArrayList<>();
@@ -53,6 +60,13 @@ public class PollerWorkerService {
 
                 if (step.getDetectedComponents() != null) {
                     ResolverAction a = storeComponents(step.getDetectedComponents());
+                    if (a != null) {
+                        resolverActions.add(a);
+                    }
+                }
+
+                if (step.getDetectedVulnerabilities() != null) {
+                    ResolverAction a = storeVulnerabilities(step.getDetectedVulnerabilities());
                     if (a != null) {
                         resolverActions.add(a);
                     }
@@ -72,7 +86,7 @@ public class PollerWorkerService {
     }
 
     private ResolverAction storeComponents(Set<Component> components) {
-        Set<String> compIds = new HashSet<String>();
+        Set<String> compIds = new HashSet<>();
         for (Component c : components) {
             if (c.getId() == null) {
                 log.warn("Obtained component with null ID: " + c); // TODO:
@@ -111,6 +125,18 @@ public class PollerWorkerService {
             return act; // we need to jump out of transactional context!
         }
 
+        return null;
+    }
+
+    private ResolverAction storeVulnerabilities(Set<Vulnerability> vulns) {
+        if (!vulns.isEmpty()) {
+            // just store all of them
+            vulnerabilityRepository.save(vulns);
+
+            ResolverAction act = new ResolverAction();
+            act.setVulnerabilities(vulns.stream().map(Vulnerability::getId).collect(Collectors.toSet()));
+            return act;
+        }
         return null;
     }
 }

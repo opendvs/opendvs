@@ -14,6 +14,8 @@ import ArtifactSelect from './ArtifactSelect'
 import Checkbox from 'material-ui/Checkbox';
 import ArtifactComponentTable from './ArtifactComponentTable'
 import ArtifactBadge from './ArtifactBadge'
+import ArtifactVulnerabilityList from './ArtifactVulnerabilityList'
+import { toggleVulnerabilityDialog } from '../../actions/vulnerability'
 import { Link } from 'react-router'
 
 export const COMPONENT_STATE_COLORS = {
@@ -55,6 +57,14 @@ class Project extends Component {
 
 	  onDialogClose = () => {
 		  this.props.dispatch(toggleComponentDialog(false, {}))
+	  }
+
+	  onVulnerabilitySelect = vuln => {
+		  this.props.dispatch(toggleVulnerabilityDialog(true, vuln))
+	  }
+
+	  onVulnerabilityClose = () => {
+		  this.props.dispatch(toggleVulnerabilityDialog(false, {}))
 	  }
 
 	  downloadTGF = () => {
@@ -116,7 +126,7 @@ class Project extends Component {
 	  }
 
 	render() {
-		const { item, artifacts, selectedArtifact, page, componentDialog,  unselectedGroups, unselectedScopes } = this.props
+		const { item, artifacts, selectedArtifact, page, componentDialog,  unselectedGroups, unselectedScopes, vulnerabilityDialog } = this.props
 
 		var icon = '';
 	    var typeProperties = [];
@@ -211,7 +221,8 @@ class Project extends Component {
 					</Col>
 		
 					<Col xs={6} md={4}>
-						<ArtifactBadge artifact={selectedArtifact} components={raw_components} /> 
+						<ArtifactBadge artifact={selectedArtifact} components={raw_components} />
+						<ArtifactVulnerabilityList components={raw_components} dialog={vulnerabilityDialog} onVulnerabilityClose={this.onVulnerabilityClose} onVulnerabilitySelect={this.onVulnerabilitySelect} />
 			        </Col>
 		        </Row>
 		    </Grid>

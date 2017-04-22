@@ -20,6 +20,7 @@ import com.voodoodyne.jackson.jsog.JSOGGenerator;
 import lombok.Getter;
 import lombok.Setter;
 import me.raska.opendvs.base.model.Component;
+import me.raska.opendvs.base.model.Vulnerability;
 
 @Getter
 @Setter
@@ -48,6 +49,9 @@ public class PollerActionStep {
 
     @Transient
     private Set<Component> detectedComponents;
+
+    @Transient
+    private Set<Vulnerability> detectedVulnerabilities;
 
     @ManyToOne(optional = false)
     private PollerAction pollerAction;

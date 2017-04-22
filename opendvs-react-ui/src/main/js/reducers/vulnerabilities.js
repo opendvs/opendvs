@@ -1,35 +1,35 @@
 import {
-  REQUEST_COMPONENTS, RECEIVE_COMPONENTS, SELECT_PAGE, TOGGLE_VERSION_DIALOG
-} from '../actions/component'
+  REQUEST_VULNERABILITIES, RECEIVE_VULNERABILITIES, SELECT_PAGE, TOGGLE_VULNERABILITY_DIALOG
+} from '../actions/vulnerability'
 
 
-const components = (state = {
+const vulnerabilities = (state = {
 	  isFetching: false,
 	  didInvalidate: false,
 	  items: [],
 	  page: { current: 1, size: 10 },
-	  dialog: {open: false, component: {}}
+	  dialog: {open: false, vulnerability: {}}
 	}, action) => {
 	  switch (action.type) {
-
-	    case TOGGLE_VERSION_DIALOG:
-	      return {
-	        ...state,
-	        dialog: {open: action.open, component: action.component}
-	      }
-	    case REQUEST_COMPONENTS:
+	    case TOGGLE_VULNERABILITY_DIALOG:
+		      return {
+		        ...state,
+		        dialog: {open: action.open, vulnerability: action.vulnerability}
+		      }
+		      
+	    case REQUEST_VULNERABILITIES:
 	      return {
 	        ...state,
 	        isFetching: true,
 	        didInvalidate: false
 	      }
 
-	    case RECEIVE_COMPONENTS:
+	    case RECEIVE_VULNERABILITIES:
 	      return {
 	        ...state,
 	        isFetching: false,
 	        didInvalidate: false,
-	        items: action.components,
+	        items: action.vulnerabilities,
 	        page: action.page
 	      }
 
@@ -46,4 +46,4 @@ const components = (state = {
 	}
 
 
-export default components
+export default vulnerabilities

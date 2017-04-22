@@ -10,4 +10,5 @@ import lombok.Setter;
 public class ResolverAction {
     private Set<String> components;
     private Set<String> artifacts;
+    private Set<String> vulnerabilities;
 }
