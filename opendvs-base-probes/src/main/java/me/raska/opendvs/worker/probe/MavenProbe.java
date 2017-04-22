@@ -41,7 +41,7 @@ import me.raska.opendvs.base.util.Util;
 
 public class MavenProbe implements NativeProbe {
     private static final String GROUP_NAME = "maven";
-    private static final String DEFAULT_SCOPE = "runtime";
+    private static final String DEFAULT_SCOPE = "compile";
     private static final String SEPARATOR = ":";
 
     private static final Logger logger = LoggerFactory.getLogger(MavenProbe.class);
@@ -164,7 +164,8 @@ public class MavenProbe implements NativeProbe {
      * @param componentsMap
      *            Map to be mutated with id => name mapping
      */
-    private void handleTGFVertex(String line, Map<String, ArtifactComponent> componentsMap, ArtifactComponent parentComponent) {
+    private void handleTGFVertex(String line, Map<String, ArtifactComponent> componentsMap,
+            ArtifactComponent parentComponent) {
         final String[] parsed = line.split(" ", 2);
         if (parsed.length != 2) {
             logger.warn("Cannot properly parse TGF vertex line '{}'", line);
@@ -180,9 +181,10 @@ public class MavenProbe implements NativeProbe {
         final ArtifactComponent component = new ArtifactComponent();
         component.setGroup(GROUP_NAME);
         component.setName(componentData[0] + SEPARATOR + componentData[1]);
-        component.setVersion(componentData[3]);
+        component.setVersion((componentData.length > 4) ? componentData[componentData.length - 2] : componentData[3]);
         // runtime for parent-level
-        component.setScope((componentData.length > 4) ? componentData[4] : DEFAULT_SCOPE);
+        component.setScope(
+                (componentData.length > 4) ? componentData[componentData.length - 1].split(" ")[0] : DEFAULT_SCOPE);
         component.setUid(GROUP_NAME + SEPARATOR + component.getName() + SEPARATOR + component.getVersion());
         component.setParentUid((parentComponent != null) ? parentComponent.getUid() : null);
 

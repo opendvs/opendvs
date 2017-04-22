@@ -62,12 +62,12 @@ public class NodeJsProbe implements NativeProbe {
         // TODO: Build full dependency tree, e.g. via
         // https://github.com/pahen/madge
         final NodePackage pkg = jsonMapper.readValue(f, NodePackage.class);
-        final ArtifactComponent parentc = getComponent(pkg.getName(), pkg.getVersion(), "runtime", parentComponent);
+        final ArtifactComponent parentc = getComponent(pkg.getName(), pkg.getVersion(), "compile", parentComponent);
         components.add(parentc);
 
         if (pkg.getDependencies() != null) {
             for (Entry<String, String> entry : pkg.getDependencies().entrySet()) {
-                components.add(getComponent(entry.getKey(), entry.getValue(), "runtime", parentc));
+                components.add(getComponent(entry.getKey(), entry.getValue(), "compile", parentc));
             }
         }
 

@@ -56,18 +56,36 @@ class ProjectGraph extends Component {
 
 		if (selectedArtifact && selectedArtifact.raw_components) {
 			const components = selectedArtifact.raw_components.filter((entry) => !unselectedGroups.includes(entry.group) && !unselectedScopes.includes(entry.scope))
-			graph.nodes = components.map((entry) => ({
-					id: entry.id,
-					label: entry.uid,
-					group: entry.group,
-					color: {
-						background: COMPONENT_STATE_COLORS[entry.state],
-						highlight: {
-							background: COMPONENT_STATE_COLORS[entry.state]
-						}
-					}
-			}));
-  		    graph.edges = components.filter((entry) => entry.parentId != null).map((entry) => ({from: entry.parentId, to: entry.id}));
+			const uids = [];
+			const links = [];
+			
+			components.forEach((entry) => {
+				// graphs
+				if (uids.indexOf(entry.uid) == -1) {
+					uids.push(entry.uid);
+					graph.nodes.push({
+							id: entry.uid,
+							label: entry.uid,
+							group: entry.group,
+							color: {
+								background: COMPONENT_STATE_COLORS[entry.state],
+								highlight: {
+									background: COMPONENT_STATE_COLORS[entry.state]
+								}
+							}
+					});
+				}
+				
+				// edges
+				if (entry.parentUid != null && links.indexOf(entry.parentUid + entry.uid) == -1) {
+					uids.push(entry.parentUid + entry.uid);
+					graph.edges.push({
+							from: entry.parentUid,
+							to: entry.uid
+					});
+				}
+			});
+
 
 			var groups = [...new Set(selectedArtifact.components.map(entry => entry.group))];
 			groups.sort();

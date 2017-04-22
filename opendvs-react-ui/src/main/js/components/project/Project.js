@@ -2,8 +2,10 @@ import React, {Component} from 'react';
 import CircularProgress from 'material-ui/CircularProgress';
 import Divider from 'material-ui/Divider';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
+import FlatButton from 'material-ui/FlatButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
 import EditorShowChart from 'material-ui/svg-icons/editor/show-chart';
+import FileFileDownload from 'material-ui/svg-icons/file/file-download';
 import { Legend, PieChart, Tooltip, Pie, Sector, Cell } from 'recharts'
 import { Grid, Row, Col } from 'react-flexbox-grid/lib/index'
 import ComponentVersionDialog from '../component/ComponentVersionDialog'
@@ -53,6 +55,55 @@ class Project extends Component {
 
 	  onDialogClose = () => {
 		  this.props.dispatch(toggleComponentDialog(false, {}))
+	  }
+
+	  downloadTGF = () => {
+			const components = this.props.selectedArtifact.raw_components;
+			const uids = [];
+			const links = [];
+
+			let vertextext = "";
+			let edgetext = "";
+
+			components.forEach((entry) => {
+				// graphs
+				if (uids.indexOf(entry.uid) == -1) {
+					uids.push(entry.uid);
+					vertextext += entry.uid + " " + entry.uid + "\n";
+				}
+				
+				// edges
+				if (entry.parentUid != null && links.indexOf(entry.parentUid + entry.uid) == -1) {
+					uids.push(entry.parentUid + entry.uid);
+					edgetext += entry.parentUid + " " + entry.uid + "\n";
+				}
+			});
+
+			
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(vertextext + "#\n" + edgetext));
+            element.setAttribute('download', this.props.selectedArtifact.name + ".tgf");
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+
+            document.body.removeChild(element);
+	  }
+
+	  downloadCSV = () => {
+		  const data = this.props.selectedArtifact.raw_components.map((entry) => (entry.uid + "," + entry.name + "," + entry.group + "," + (entry.version?entry.version:"") + "," + (entry.scope?entry.scope:"") + "," + (entry.hash?entry.hash:"") + "," + (entry.parentUid?entry.parentUid:"") + "," + entry.state));
+		  data.unshift("UID,NAME,GROUP,VERSION,SCOPE,HASH,PARENT,STATE");
+
+          var element = document.createElement('a');
+          element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(data.join("\n")));
+          element.setAttribute('download', this.props.selectedArtifact.name + ".csv");
+
+          element.style.display = 'none';
+          document.body.appendChild(element);
+          element.click();
+
+          document.body.removeChild(element);
 	  }
 
 	  onFile = (event) => {
@@ -154,6 +205,8 @@ class Project extends Component {
 		        </Row>
 		        <Row>
 					<Col xs={6} md={8}>
+			    		<FlatButton label="TGF" icon={<FileFileDownload />} onClick={this.downloadTGF}></FlatButton>
+			    		<FlatButton label="CSV" icon={<FileFileDownload />} onClick={this.downloadCSV}></FlatButton>
 						<ArtifactComponentTable components={pagedComponents} page={pagedPage} onPageChange={this.onPageChange} onComponentClick={this.onComponentClick} />
 					</Col>
 		
