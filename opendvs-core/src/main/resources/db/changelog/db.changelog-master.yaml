@@ -1,0 +1,651 @@
+databaseChangeLog:
+- changeSet:
+    id: 1492863998374-1
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: identity
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: source_type
+            type: VARCHAR(255)
+        - column:
+            name: type
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: uri
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: project_id
+            type: VARCHAR(255)
+        - column:
+            name: initiated
+            type: datetime(6)
+        - column:
+            name: state
+            type: VARCHAR(255)
+        tableName: artifact
+- changeSet:
+    id: 1492863998374-2
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: artifact_group
+            type: VARCHAR(255)
+        - column:
+            name: artifact_hash
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: name
+            type: VARCHAR(255)
+        - column:
+            name: parent_uid
+            type: VARCHAR(255)
+        - column:
+            name: scope
+            type: VARCHAR(255)
+        - column:
+            name: state
+            type: INT
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: uid
+            type: VARCHAR(255)
+        - column:
+            name: version
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: artifact_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: probe_action_step_id
+            type: VARCHAR(255)
+        - column:
+            name: parent_id
+            type: VARCHAR(255)
+        tableName: artifact_component
+- changeSet:
+    id: 1492863998374-3
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: component_group
+            type: VARCHAR(255)
+        - column:
+            name: latest_version
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: name
+            type: VARCHAR(255)
+        tableName: component
+- changeSet:
+    id: 1492863998374-4
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: hash
+            type: VARCHAR(255)
+        - column:
+            name: packaging
+            type: VARCHAR(255)
+        - column:
+            name: published
+            type: datetime(6)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: source
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: synced
+            type: datetime(6)
+        - column:
+            name: version
+            type: VARCHAR(255)
+        - column:
+            name: component_id
+            type: VARCHAR(255)
+        tableName: component_version
+- changeSet:
+    id: 1492863998374-5
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: ended
+            type: datetime(6)
+        - column:
+            name: filter
+            type: VARCHAR(255)
+        - column:
+            name: initiated
+            type: datetime(6)
+        - column:
+            name: started
+            type: datetime(6)
+        - column:
+            name: state
+            type: VARCHAR(255)
+        - column:
+            name: artifact_id
+            type: VARCHAR(255)
+        tableName: poller_action
+- changeSet:
+    id: 1492863998374-6
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: output
+            type: LONGTEXT
+        - column:
+            name: state
+            type: VARCHAR(255)
+        - column:
+            name: type
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: poller_action_id
+            type: VARCHAR(255)
+        - column:
+            name: poller
+            type: VARCHAR(255)
+        - column:
+            name: ended
+            type: datetime(6)
+        - column:
+            name: started
+            type: datetime(6)
+        tableName: poller_action_step
+- changeSet:
+    id: 1492863998374-7
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: debug
+            type: BIT(1)
+        - column:
+            name: ended
+            type: datetime(6)
+        - column:
+            name: initiated
+            type: datetime(6)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: max_iterations
+            type: BIGINT
+        - column:
+            name: started
+            type: datetime(6)
+        - column:
+            name: state
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: artifact_id
+            type: VARCHAR(255)
+        tableName: probe_action
+- changeSet:
+    id: 1492863998374-8
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: output
+            type: LONGTEXT
+        - column:
+            name: state
+            type: VARCHAR(255)
+        - column:
+            name: type
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: probe_action_id
+            type: VARCHAR(255)
+        tableName: probe_action_step
+- changeSet:
+    id: 1492863998374-9
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: type
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: major_version_offset
+            type: INT
+        tableName: project
+- changeSet:
+    id: 1492863998374-10
+    author: raskaluk (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: project_id
+            type: VARCHAR(255)
+        - column:
+            name: type_properties
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              constraints:
+                nullable: false
+            name: type_properties_key
+            type: VARCHAR(255)
+        tableName: project_type_properties
+- changeSet:
+    id: 1492863998374-11
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: artifact
+- changeSet:
+    id: 1492863998374-12
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: artifact_component
+- changeSet:
+    id: 1492863998374-13
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: component
+- changeSet:
+    id: 1492863998374-14
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: component_version
+- changeSet:
+    id: 1492863998374-15
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: poller_action
+- changeSet:
+    id: 1492863998374-16
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: poller_action_step
+- changeSet:
+    id: 1492863998374-17
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: probe_action
+- changeSet:
+    id: 1492863998374-18
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: probe_action_step
+- changeSet:
+    id: 1492863998374-19
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: id
+        constraintName: PRIMARY
+        tableName: project
+- changeSet:
+    id: 1492863998374-20
+    author: raskaluk (generated)
+    changes:
+    - addPrimaryKey:
+        columnNames: project_id, type_properties_key
+        constraintName: PRIMARY
+        tableName: project_type_properties
+- changeSet:
+    id: 1492863998374-21
+    author: raskaluk (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: artifact_id
+        constraintName: UK_h6s6tl07bkl61k0npe124nbi4
+        tableName: probe_action
+- changeSet:
+    id: 1492863998374-22
+    author: raskaluk (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: project_id, identity
+        constraintName: UKa7vsyndbn0wocw2y9lkcmxri
+        tableName: artifact
+- changeSet:
+    id: 1492863998374-23
+    author: raskaluk (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: component_group, name
+        constraintName: UKddyyrpuc9yvdihrpinme1i8t3
+        tableName: component
+- changeSet:
+    id: 1492863998374-24
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: poller_action_id
+        indexName: FKaogl3nainqf1uikj7fawwb1dr
+        tableName: poller_action_step
+- changeSet:
+    id: 1492863998374-25
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: component_id
+        indexName: FKfj7ymgeu6ss8g1nlx4xog1h01
+        tableName: component_version
+- changeSet:
+    id: 1492863998374-26
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: probe_action_id
+        indexName: FKsjov8fw9bnr0et2g94day0ej3
+        tableName: probe_action_step
+- changeSet:
+    id: 1492863998374-27
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: probe_action_step_id
+        indexName: FKsx567dhvlgqci1dr2pshudr80
+        tableName: artifact_component
+- changeSet:
+    id: 1492863998374-28
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: artifact_id
+        indexName: FKt4nqbjchsn72u2rv6o9cxwkbi
+        tableName: artifact_component
+- changeSet:
+    id: 1492863998374-29
+    author: raskaluk (generated)
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: uid
+        indexName: IDXn6v3wipbykw9beubrvpe42026
+        tableName: artifact_component
+- changeSet:
+    id: 1492863998374-30
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: project_id
+        baseTableName: project_type_properties
+        constraintName: FK3qm5e6ig6gj3w5u6e3keq583i
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: project
+- changeSet:
+    id: 1492863998374-31
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: poller_action_id
+        baseTableName: poller_action_step
+        constraintName: FKaogl3nainqf1uikj7fawwb1dr
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: poller_action
+- changeSet:
+    id: 1492863998374-32
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: component_id
+        baseTableName: component_version
+        constraintName: FKfj7ymgeu6ss8g1nlx4xog1h01
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: component
+- changeSet:
+    id: 1492863998374-33
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: artifact_id
+        baseTableName: probe_action
+        constraintName: FKnx3kdlrofbo74nmk75i2pim8d
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: artifact
+- changeSet:
+    id: 1492863998374-34
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: project_id
+        baseTableName: artifact
+        constraintName: FKqi7jpmsvst8h67mvp18lrkdol
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: project
+- changeSet:
+    id: 1492863998374-35
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: probe_action_id
+        baseTableName: probe_action_step
+        constraintName: FKsjov8fw9bnr0et2g94day0ej3
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: probe_action
+- changeSet:
+    id: 1492863998374-36
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: probe_action_step_id
+        baseTableName: artifact_component
+        constraintName: FKsx567dhvlgqci1dr2pshudr80
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: probe_action_step
+- changeSet:
+    id: 1492863998374-37
+    author: raskaluk (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: artifact_id
+        baseTableName: artifact_component
+        constraintName: FKt4nqbjchsn72u2rv6o9cxwkbi
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: artifact
+
