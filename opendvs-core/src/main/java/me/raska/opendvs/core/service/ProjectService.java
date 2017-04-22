@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -113,6 +115,19 @@ public class ProjectService {
 
         artifact.setInitiated(new Date());
         return projectHandlers.get(p.getType()).triggerScan(p, artifact);
+    }
+
+    public Artifact handleWebHook(String projectId, HttpServletRequest request, HttpServletResponse response) {
+        Project p = projectRepository.findOne(projectId);
+        if (p == null) {
+            throw new InvalidRequestException("Project doesn't exist");
+        }
+
+        if (!projectHandlers.containsKey(p.getType())) {
+            throw new InvalidRequestException("Project type is not supported");
+        }
+
+        return projectHandlers.get(p.getType()).handleWebHook(p, request, response);
     }
 
     public Artifact uploadArtifact(String projectId, MultipartFile file) {

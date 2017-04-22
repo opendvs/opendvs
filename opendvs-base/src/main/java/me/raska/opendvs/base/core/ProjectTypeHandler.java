@@ -3,6 +3,9 @@ package me.raska.opendvs.base.core;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import me.raska.opendvs.base.model.artifact.Artifact;
@@ -33,6 +36,12 @@ public interface ProjectTypeHandler {
 
     Artifact triggerScan(Project project, Artifact art);
 
+    Artifact handleWebHook(Project project, HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * Pull-type hooks
+     * @param projects
+     */
     void setupProjectHooks(List<Project> projects);
 
 }

@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,13 +82,13 @@ public class GitProjectTypeHandler implements ProjectTypeHandler {
             throw new InvalidRequestException("Missing required type property `uri`");
         }
 
-        // TODO: refactor to dynamically check agains descriptor
+        // TODO: refactor to dynamically check against descriptor
         if (p.getTypeProperties().size() > 2
                 || p.getTypeProperties().size() > 1 && !p.getTypeProperties().containsKey("private_key")) {
             throw new InvalidRequestException("Obtained excessive type properties");
         }
 
-        // TODO: check URI is indeed Git repository 
+        // TODO: check URI is indeed Git repository
     }
 
     @Override
@@ -119,5 +121,11 @@ public class GitProjectTypeHandler implements ProjectTypeHandler {
 
         rabbitTemplate.convertAndSend(act);
         return art;
+    }
+
+    @Override
+    public Artifact handleWebHook(Project project, HttpServletRequest request, HttpServletResponse response) {
+        // TODO: hooks for GitHub, GitLab, etc.
+        throw new InvalidRequestException("Unimplemented");
     }
 }

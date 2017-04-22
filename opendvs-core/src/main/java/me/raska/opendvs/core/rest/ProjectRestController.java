@@ -2,6 +2,9 @@ package me.raska.opendvs.core.rest;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,5 +69,10 @@ public class ProjectRestController {
     @RequestMapping(value = "/{id}/trigger", method = RequestMethod.POST)
     public Artifact triggetScan(@PathVariable("id") String projectId, @RequestBody Artifact artifact) {
         return projectService.triggerScan(projectId, artifact);
+    }
+
+    @RequestMapping(value = "/{id}/hook", method = RequestMethod.POST)
+    public Artifact triggetScan(@PathVariable("id") String projectId, HttpServletRequest request, HttpServletResponse response) {
+        return projectService.handleWebHook(projectId, request, response);
     }
 }

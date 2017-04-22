@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,9 +103,8 @@ public class FilesystemProjectTypeHandler implements ProjectTypeHandler {
 
     @PostConstruct
     private void init() {
-        descriptor = ProjectType.builder().id("local").name("Local project type")
-                .description(
-                        "For projects that don't want to expose the artifacts, user has to upload artifact directly via UI / API")
+        descriptor = ProjectType.builder().id("local").name("Local project type").description(
+                "For projects that don't want to expose the artifacts, user has to upload artifact directly via UI / API")
                 .properties(Arrays.asList()).build();
     }
 
@@ -117,5 +118,10 @@ public class FilesystemProjectTypeHandler implements ProjectTypeHandler {
     @Override
     public Artifact triggerScan(Project project, Artifact art) {
         throw new InvalidRequestException("Triggering isn't supported for this type. Upload the artifact instead!");
+    }
+
+    @Override
+    public Artifact handleWebHook(Project project, HttpServletRequest request, HttpServletResponse response) {
+        throw new InvalidRequestException("WebHooks not supported for this type. Upload the artifact instead!");
     }
 }
