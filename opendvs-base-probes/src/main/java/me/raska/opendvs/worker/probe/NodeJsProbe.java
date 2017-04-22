@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.slf4j.Logger;
@@ -44,48 +43,38 @@ public class NodeJsProbe implements NativeProbe {
         return "package.json".equals(f.getName());
     }
 
+    private ArtifactComponent getComponent(String name, String version, String scope,
+            ArtifactComponent parentComponent) {
+        final ArtifactComponent c = new ArtifactComponent();
+        c.setScope(scope);
+        c.setGroup("npm");
+        c.setVersion(version);
+        c.setName(name);
+        c.setUid("npm:" + c.getName() + ":" + c.getVersion());
+        c.setParentUid((parentComponent != null) ? parentComponent.getUid() : null);
+        return c;
+    }
+
     private List<ArtifactComponent> getNodeComponents(File f, ArtifactComponent parentComponent)
             throws IOException, XmlPullParserException {
         final List<ArtifactComponent> components = new ArrayList<>();
 
-        // TODO: Build full dependency tree, e.g. via https://github.com/pahen/madge
+        // TODO: Build full dependency tree, e.g. via
+        // https://github.com/pahen/madge
         final NodePackage pkg = jsonMapper.readValue(f, NodePackage.class);
-        final ArtifactComponent parentc = new ArtifactComponent();
-        parentc.setId(UUID.randomUUID().toString());
-        parentc.setGroup("npm");
-        parentc.setVersion(pkg.getVersion());
-        parentc.setName(pkg.getName());
-        parentc.setUid("npm:" + parentc.getName() + ":" + parentc.getVersion());
-        parentc.setParentId((parentComponent != null) ? parentComponent.getId() : null);
-        parentc.setScope("runtime");
+        final ArtifactComponent parentc = getComponent(pkg.getName(), pkg.getVersion(), "runtime", parentComponent);
         components.add(parentc);
 
-
         if (pkg.getDependencies() != null) {
-            for (Entry<String, String> entry: pkg.getDependencies().entrySet()) {
-                final ArtifactComponent c = new ArtifactComponent();
-                c.setId(UUID.randomUUID().toString());
-                c.setScope("runtime"); // this is always runtime
-                c.setGroup("npm");
-                c.setVersion(entry.getValue());
-                c.setName(entry.getKey());
-                c.setUid("npm:"+c.getName() + ":" + c.getVersion());
-                c.setParentId(parentc.getId());
-                components.add(c);
+            for (Entry<String, String> entry : pkg.getDependencies().entrySet()) {
+                components.add(getComponent(entry.getKey(), entry.getValue(), "runtime", parentc));
             }
         }
 
         if (pkg.getDevDependencies() != null) {
-            for (Entry<String, String> entry: pkg.getDevDependencies().entrySet()) {
-                final ArtifactComponent c = new ArtifactComponent();
-                c.setId(UUID.randomUUID().toString());
-                c.setScope("test"); // TODO: validate if we want to use test instead of devel
-                c.setGroup("npm");
-                c.setVersion(entry.getValue());
-                c.setName(entry.getKey());
-                c.setUid("npm:"+c.getName() + ":" + c.getVersion());
-                c.setParentId(parentc.getId());
-                components.add(c);
+            for (Entry<String, String> entry : pkg.getDevDependencies().entrySet()) {
+                // TODO: validate if we want to use test instead of devel
+                components.add(getComponent(entry.getKey(), entry.getValue(), "test", parentc));
             }
         }
 

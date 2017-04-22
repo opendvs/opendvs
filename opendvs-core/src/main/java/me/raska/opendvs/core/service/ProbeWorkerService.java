@@ -71,6 +71,7 @@ public class ProbeWorkerService {
 
                 if (cs != null) {
                     cs.stream().forEach(c -> {
+                        c.setId(null); // force new entity creation
                         c.setArtifact(art);
                         c.setProbeActionStep(st);
                         c.setState(ArtifactComponent.State.UNKNOWN);

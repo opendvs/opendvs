@@ -1,9 +1,12 @@
 package me.raska.opendvs.worker.probe;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
@@ -25,6 +27,7 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.apache.maven.shared.invoker.PrintStreamHandler;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,29 +59,62 @@ public class MavenProbe implements NativeProbe {
         return "pom.xml".equals(f.getName());
     }
 
+    private void executeMavenCommand(File pom, List<String> goals) throws MavenInvocationException, IOException {
+
+        InvocationRequest request = new DefaultInvocationRequest();
+        request.setPomFile(pom);
+        request.setGoals(goals);
+
+        Invoker inv = new DefaultInvoker();
+        inv.setMavenHome(new File(mavenHome));
+        inv.setOutputHandler(null);
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(os);
+        inv.setErrorHandler(new PrintStreamHandler(ps, true));
+
+        InvocationResult res = inv.execute(request);
+        if (res.getExitCode() != 0) {
+            throw new MavenInvocationException("Cannot run '" + goals + "', execution returned exit code "
+                    + res.getExitCode() + "\n" + new String(os.toByteArray(), StandardCharsets.UTF_8));
+        }
+    }
+
     private Model getPomModel(File pom) throws IOException, XmlPullParserException {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         return reader.read(new FileReader(pom));
     }
 
-    private File generateDependencyFile(File pom) throws IOException, MavenInvocationException {
+    private File generateEffectivePom(File pom) throws IOException, MavenInvocationException {
         File tempfile = Files.createTempFile(null, ".pom").toFile();
         tempfile.deleteOnExit();
-        InvocationRequest request = new DefaultInvocationRequest();
-        request.setPomFile(pom);
-        request.setGoals(
-                Arrays.asList("dependency:tree", "-DoutputType=tgf", "-DoutputFile=" + tempfile.getAbsolutePath()));
 
-        Invoker inv = new DefaultInvoker();
-        inv.setMavenHome(new File(mavenHome));
-        inv.setOutputHandler(null);
-        inv.setErrorHandler(null);
-
-        InvocationResult res = inv.execute(request);
-        if (res.getExitCode() != 0) {
-            throw new MavenInvocationException(
-                    "Cannot build effective pom, execution returned exit code " + res.getExitCode());
+        try {
+            executeMavenCommand(pom, Arrays.asList("help:effective-pom", "-Doutput=" + tempfile.getAbsolutePath()));
+        } catch (Exception e) {
+            if (!tempfile.delete()) {
+                logger.warn("Cannot delete tempfile " + tempfile.getAbsolutePath());
+            }
+            throw e;
         }
+
+        return tempfile;
+    }
+
+    private File generateDependencyTree(File pom) throws IOException, MavenInvocationException {
+        File tempfile = Files.createTempFile(null, ".pom").toFile();
+        tempfile.deleteOnExit();
+
+        try {
+            executeMavenCommand(pom,
+                    Arrays.asList("dependency:tree", "-DoutputType=tgf", "-DoutputFile=" + tempfile.getAbsolutePath()));
+        } catch (Exception e) {
+            if (!tempfile.delete()) {
+                logger.warn("Cannot delete tempfile " + tempfile.getAbsolutePath());
+            }
+            throw e;
+        }
+
         return tempfile;
     }
 
@@ -88,24 +124,22 @@ public class MavenProbe implements NativeProbe {
         final Model model = getPomModel(pom);
 
         final ArtifactComponent parentc = new ArtifactComponent();
-        parentc.setId(UUID.randomUUID().toString());
         parentc.setGroup(GROUP_NAME);
         parentc.setVersion(model.getVersion());
         parentc.setName(model.getGroupId() + SEPARATOR + model.getArtifactId());
         parentc.setUid(GROUP_NAME + SEPARATOR + parentc.getName() + SEPARATOR + parentc.getVersion());
-        parentc.setParentId((parentComponent != null) ? parentComponent.getId() : null);
+        parentc.setParentUid((parentComponent != null) ? parentComponent.getUid() : null);
         parentc.setScope(DEFAULT_SCOPE);
         components.add(parentc);
 
         Map<String, String> properties = mapMavenProperties(model);
         for (Dependency dep : model.getDependencies()) {
             final ArtifactComponent c = new ArtifactComponent();
-            c.setId(UUID.randomUUID().toString());
             c.setScope((dep.getScope() == null) ? DEFAULT_SCOPE : dep.getScope());
             c.setGroup(GROUP_NAME);
 
             String version = dep.getVersion();
-            if (version != null)  {
+            if (version != null) {
                 // replace all unresolved properties with this nasty hack
                 for (Entry<String, String> entry : properties.entrySet()) {
                     version = version.replace(entry.getKey(), entry.getValue());
@@ -115,7 +149,7 @@ public class MavenProbe implements NativeProbe {
 
             c.setName(dep.getGroupId() + SEPARATOR + dep.getArtifactId());
             c.setUid(GROUP_NAME + SEPARATOR + c.getName() + SEPARATOR + c.getVersion());
-            c.setParentId(parentc.getId());
+            c.setParentUid(parentc.getUid());
             components.add(c);
         }
 
@@ -130,7 +164,7 @@ public class MavenProbe implements NativeProbe {
      * @param componentsMap
      *            Map to be mutated with id => name mapping
      */
-    private void handleTGFVertex(String line, Map<String, ArtifactComponent> componentsMap, String parentComponentId) {
+    private void handleTGFVertex(String line, Map<String, ArtifactComponent> componentsMap, ArtifactComponent parentComponent) {
         final String[] parsed = line.split(" ", 2);
         if (parsed.length != 2) {
             logger.warn("Cannot properly parse TGF vertex line '{}'", line);
@@ -144,14 +178,13 @@ public class MavenProbe implements NativeProbe {
         }
 
         final ArtifactComponent component = new ArtifactComponent();
-        component.setId(UUID.randomUUID().toString());
         component.setGroup(GROUP_NAME);
         component.setName(componentData[0] + SEPARATOR + componentData[1]);
         component.setVersion(componentData[3]);
         // runtime for parent-level
         component.setScope((componentData.length > 4) ? componentData[4] : DEFAULT_SCOPE);
         component.setUid(GROUP_NAME + SEPARATOR + component.getName() + SEPARATOR + component.getVersion());
-        component.setParentId(parentComponentId);
+        component.setParentUid((parentComponent != null) ? parentComponent.getUid() : null);
 
         componentsMap.put(parsed[0], component);
     }
@@ -172,7 +205,7 @@ public class MavenProbe implements NativeProbe {
             return;
         }
 
-        target.setParentId(source.getId());
+        target.setParentUid(source.getUid());
     }
 
     private Collection<ArtifactComponent> handleDependencyTree(File dependencyFile, ArtifactComponent parentComponent)
@@ -192,7 +225,7 @@ public class MavenProbe implements NativeProbe {
                 if (edges) {
                     handleTGFEdge(line, componentsMap);
                 } else {
-                    handleTGFVertex(line, componentsMap, (parentComponent != null) ? parentComponent.getId() : null);
+                    handleTGFVertex(line, componentsMap, parentComponent);
                 }
             }
         }
@@ -203,16 +236,23 @@ public class MavenProbe implements NativeProbe {
             throws IOException, XmlPullParserException {
         final List<ArtifactComponent> components = new ArrayList<>();
 
+        File fallbackPom = pom;
         File dependencyFile = null;
         try {
-            dependencyFile = generateDependencyFile(pom);
+            dependencyFile = generateDependencyTree(pom);
         } catch (IOException | MavenInvocationException e) {
-            logger.warn("Cannot build dependency for " + pom.getAbsolutePath(), e);
-            // fallback to regular pom
+            logger.info("Cannot build dependency tree for " + pom.getAbsolutePath() + ", trying effective pom", e);
+            try {
+                fallbackPom = generateEffectivePom(pom);
+            } catch (IOException | MavenInvocationException e2) {
+                logger.warn("Cannot build dependency tree nor effective pom for " + pom.getAbsolutePath()
+                        + ", falling back", e2);
+                // fallback to regular pom
+            }
         }
 
         if (dependencyFile == null) {
-            components.addAll(handlePomDependencies(pom, parentComponent));
+            components.addAll(handlePomDependencies(fallbackPom, parentComponent));
         } else {
             components.addAll(handleDependencyTree(dependencyFile, parentComponent));
             if (!dependencyFile.delete()) {

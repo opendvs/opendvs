@@ -29,7 +29,6 @@ import lombok.Setter;
 import me.raska.opendvs.base.model.probe.ProbeAction;
 import me.raska.opendvs.base.model.project.Project;
 
-// TODO: get rid of no/all/builder
 @Getter
 @Setter
 @Entity

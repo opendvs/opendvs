@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +49,19 @@ public class ZipExtractProbe implements NativeProbe {
         return new ArrayList<>(steps);
     }
 
+    private ArtifactComponent getComponent(String name, String hash, String scope, ArtifactComponent parentComponent) {
+        final ArtifactComponent component = new ArtifactComponent();
+        component.setUid("zip:" + hash);
+        component.setName(name);
+        component.setScope(scope);
+
+        component.setParentUid((parentComponent != null) ? parentComponent.getUid() : null);
+        component.setHash(hash);
+        component.setGroup("zip");
+
+        return component;
+    }
+
     private ProbeActionStep extractResource(File file, ArtifactComponent parent, ProbingContext context) {
         ProbeActionStep step = new ProbeActionStep();
         step.setType(ProbeActionStep.Type.EXTRACTION);
@@ -70,14 +82,8 @@ public class ZipExtractProbe implements NativeProbe {
         if (file.isFile()) {
             try {
                 if (EXTRACT_MIME.contains(Files.probeContentType(file.toPath()))) {
-                    final ArtifactComponent component = new ArtifactComponent();
-                    component.setId(UUID.randomUUID().toString());
-                    component.setUid("zip:" + file.getName());
-                    component.setName(file.getName());
-
-                    component.setParentId((parent != null) ? parent.getId() : null);
-                    component.setHash(Util.getFileSha1Checksum(file));
-                    component.setGroup("zip");
+                    final ArtifactComponent component = getComponent(file.getName(), Util.getFileSha1Checksum(file),
+                            "runtime", parent);
 
                     File f = context.getComponentDirectoryPath(component).toFile();
                     if (f.exists()) {
@@ -104,14 +110,8 @@ public class ZipExtractProbe implements NativeProbe {
                 }).forEach(p -> {
                     try {
                         File componentFile = p.toFile();
-                        final ArtifactComponent component = new ArtifactComponent();
-                        component.setId(UUID.randomUUID().toString());
-                        component.setUid("zip:" + componentFile.getName());
-                        component.setName(componentFile.getName());
-
-                        component.setParentId((parent != null) ? parent.getId() : null);
-                        component.setHash(Util.getFileSha1Checksum(componentFile));
-                        component.setGroup("zip");
+                        final ArtifactComponent component = getComponent(componentFile.getName(),
+                                Util.getFileSha1Checksum(componentFile), "runtime", parent);
 
                         File f = context.getComponentDirectoryPath(component).toFile();
                         if (f.exists()) {

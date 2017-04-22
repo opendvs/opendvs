@@ -2,10 +2,13 @@ package me.raska.opendvs.base.model.artifact;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,6 +25,8 @@ import me.raska.opendvs.base.model.probe.ProbeActionStep;
 @Table(name = "ARTIFACT_COMPONENT", indexes = { @Index(columnList = "uid") })
 public class ArtifactComponent {
     @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
 
     /**
@@ -44,7 +49,7 @@ public class ArtifactComponent {
     @Column(name = "artifact_hash")
     private String hash;
 
-    private String parentId;
+    private String parentUid;
 
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @ManyToOne(optional = false)
@@ -66,7 +71,7 @@ public class ArtifactComponent {
         c.version = this.version;
         c.scope = this.scope;
         c.hash = this.hash;
-        c.parentId = this.parentId;
+        c.parentUid = this.parentUid;
         c.state = this.state;
 
         return c;
