@@ -1,5 +1,5 @@
 import * as JSOG from 'jsog'
-import {handleRequestErrors} from './auth'
+import { handleRequestErrors } from './auth'
 import { toggleSnackbar } from '../actions/snackbar'
 import { API_URL } from '../config.js'
 
@@ -96,7 +96,7 @@ export const receiveProjects = (data) => ({
 export const fetchProjects = (page) => (dispatch) => {
   dispatch(requestProjects())
   return fetch(`${API_URL}/projects?size=${page.size}&page=${page.current - 1}`, {credentials: 'include', redirect: 'manual'})
-	.then(handleRequestErrors)
+	.then((res) => handleRequestErrors(res, dispatch))
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -134,7 +134,7 @@ export const toggleProjectDialog = (opened) =>  {
 
 export const fetchProjectTypes = () => (dispatch) => {
   return fetch(`${API_URL}/projects/types`, {credentials: 'include', redirect: 'manual'})
-	.then(handleRequestErrors)
+	.then((res) => handleRequestErrors(res, dispatch))
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -202,7 +202,7 @@ export const createProjectRequested = (project) => {
 	})
 }
 
-export const createNewProject = (project) => (dispatch) => {
+export const createNewProject = (project) => (dispatch, getState) => {
 	return fetch(`${API_URL}/projects`, {
 	  method: 'POST',
 	  headers: {
@@ -212,10 +212,11 @@ export const createNewProject = (project) => (dispatch) => {
 	  body: JSON.stringify(project),
 	  credentials: 'include', redirect: 'manual'
 	})
-  	.then(handleRequestErrors)
+  	.then((res) => handleRequestErrors(res, dispatch))
 	.then(result=>result.json())
     .then(item => {
     	var proj = JSOG.decode(item);
+    	dispatch(fetchProjects(getState().projects.page));
     	dispatch(newProjectCreated(proj));
     	dispatch(toggleSnackbar(true, `Project ${proj.name} successfully created`));
 	})
@@ -228,7 +229,7 @@ export const createNewProject = (project) => (dispatch) => {
 export const fetchProject = (id) => (dispatch) => {
   dispatch(requestProject())
   return fetch(`${API_URL}/projects/${id}`, {credentials: 'include', redirect: 'manual'})
-	.then(handleRequestErrors)
+	.then((res) => handleRequestErrors(res, dispatch))
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -240,7 +241,7 @@ export const fetchProject = (id) => (dispatch) => {
 export const selectArtifact = (projectId, artId) => (dispatch) => {
   dispatch(requestArtifact())
   return fetch(`${API_URL}/projects/${projectId}/artifacts/${artId}`, {credentials: 'include', redirect: 'manual'})
-	.then(handleRequestErrors)
+	.then((res) => handleRequestErrors(res, dispatch))
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -258,7 +259,7 @@ export const selectArtifact = (projectId, artId) => (dispatch) => {
 const fetchArtifacts = (id) => (dispatch) => {
   dispatch(requestArtifacts())
   return fetch(`${API_URL}/projects/${id}/artifacts`, {credentials: 'include', redirect: 'manual'})
-	.then(handleRequestErrors)
+	.then((res) => handleRequestErrors(res, dispatch))
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -278,7 +279,7 @@ export const selectComponentPage = (newPage) => ({
 export const openComponentDialog = (component) => (dispatch) => {
 	dispatch(toggleComponentDialog(true, {}, undefined, undefined));
 	return fetch(`${API_URL}/components/${component.group}:${component.name}/detail`, {credentials: 'include', redirect: 'manual'})
-  	.then(handleRequestErrors)
+  	.then((res) => handleRequestErrors(res, dispatch))
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);
@@ -298,9 +299,10 @@ export const toggleComponentDialog = (open, component, version, state) => {
 export const uploadArtifact = (formData, projectId) => (dispatch) => {
 	// TODO: dispatch UPLOAD_STARTED action
 	  return fetch(`${API_URL}/projects/${projectId}/upload`, {method: "POST", body: formData, credentials: 'include', redirect: 'manual'})
-	      .then(handleRequestErrors)
+	      .then((res) => handleRequestErrors(res, dispatch))
+	  	  .then(result=>result.json())
 	  	  .then((response) => {
-			var data = JSOG.decode(JSON.parse(response));
+			var data = JSOG.decode(response);
 			dispatch(artifactUploaded(data));
 
 			data.components = removeDuplicateUIDs(data.components);

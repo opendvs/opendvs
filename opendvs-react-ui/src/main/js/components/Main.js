@@ -6,6 +6,8 @@ import VulnerabilityListContainer from '../containers/VulnerabilityListContainer
 import ProjectContainer from '../containers/ProjectContainer'
 import ProjectGraphContainer from '../containers/ProjectGraphContainer'
 import MainContainer from '../containers/MainContainer'
+import ForbiddenErrorContainer from '../containers/ForbiddenErrorContainer'
+import NotFoundErrorContainer from '../containers/NotFoundErrorContainer'
 
 class Main extends Component {
 
@@ -19,6 +21,8 @@ class Main extends Component {
         <Route path="project/:projectId/graph" components={{content: ProjectGraphContainer}}/>
   		<Route path="components" components={{content: ComponentListContainer}}/>
   		<Route path="vulnerabilities" components={{content: VulnerabilityListContainer}}/>
+  		<Route path="errors/403" components={{content: ForbiddenErrorContainer}}/>
+  		<Route path="errors/404" components={{content: NotFoundErrorContainer}}/>
         </Route>
       </Router>
     )

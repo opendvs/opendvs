@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import { connect } from 'react-redux'
 
 import { handleArtifactUpdate, handleResolvedComponents } from '../actions/project'
+import {fetchUserInfo} from '../actions/auth'
 import * as JSOG from 'jsog'
 import {cyan500} from 'material-ui/styles/colors';
 import AppBar from 'material-ui/AppBar';
@@ -40,8 +41,7 @@ export class MainWrapper extends Component {
 		    var socket = new SockJS('http://localhost:8080/event');
 		    var stompClient = Stomp.over(socket);
 
-		    console.log(props);
-		    console.log(props.dispatch);
+		    props.dispatch(fetchUserInfo())
 		    stompClient.connect({}, function (frame) {
 		        console.log('Connected: ' + frame);
 		        stompClient.subscribe('/topic/event', function (event) {
@@ -63,7 +63,7 @@ export class MainWrapper extends Component {
 	render() {
 
 		const loggedIn = (
-				<FlatButton label="user@domain.tld" href="/logout" labelPosition="before" icon={<ActionExitToApp />} />
+				<FlatButton label={this.props.user.id} href="/logout" labelPosition="before" icon={<ActionExitToApp />} />
 		)
 		 return (
 			      <MuiThemeProvider muiTheme={muiTheme}>

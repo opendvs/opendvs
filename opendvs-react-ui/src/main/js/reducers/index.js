@@ -5,6 +5,7 @@ import addProject from './addProject'
 import snackbar from './snackbar'
 import project from './project'
 import vulnerabilities from './vulnerabilities'
+import user from './user'
 
 const opendvsApp = combineReducers({
     projects,
@@ -12,7 +13,8 @@ const opendvsApp = combineReducers({
     snackbar,
     components,
     project,
-    vulnerabilities
+    vulnerabilities,
+    user
 })
 
 export default opendvsApp

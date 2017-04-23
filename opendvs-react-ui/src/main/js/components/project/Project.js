@@ -102,8 +102,8 @@ class Project extends Component {
 	  }
 
 	  downloadCSV = () => {
-		  const data = this.props.selectedArtifact.raw_components.map((entry) => (entry.uid + "," + entry.name + "," + entry.group + "," + (entry.version?entry.version:"") + "," + (entry.scope?entry.scope:"") + "," + (entry.hash?entry.hash:"") + "," + (entry.parentUid?entry.parentUid:"") + "," + entry.state));
-		  data.unshift("UID,NAME,GROUP,VERSION,SCOPE,HASH,PARENT,STATE");
+		  const data = this.props.selectedArtifact.raw_components.map((entry) => (entry.uid + "," + entry.name + "," + entry.group + "," + (entry.version?entry.version:"") + "," + (entry.scope?entry.scope:"") + "," + (entry.hash?entry.hash:"") + "," + (entry.parentUid?entry.parentUid:"") + "," + entry.state + "," + entry.vulnerabilities.map(v => v.id).join(";")));
+		  data.unshift("UID,NAME,GROUP,VERSION,SCOPE,HASH,PARENT,STATE,VULNERABILITIES");
 
           var element = document.createElement('a');
           element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(data.join("\n")));

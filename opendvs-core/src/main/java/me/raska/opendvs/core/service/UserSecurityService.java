@@ -9,8 +9,11 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import me.raska.opendvs.base.model.security.User;
@@ -75,5 +78,15 @@ public class UserSecurityService {
         User u = userRepository.findOne(userSession.getUser().getId());
         u.getRoles().add(authority);
         userSession.setUser(userRepository.save(u));
+        updateSpringSecurityContext(u);
+    }
+
+    private void updateSpringSecurityContext(User u) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(),
+                        u.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())));
+
+        u.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 }
