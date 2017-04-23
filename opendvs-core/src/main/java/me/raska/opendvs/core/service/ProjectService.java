@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,19 +46,30 @@ public class ProjectService {
     private PollerActionRepository pollerActionRepository;
 
     @Autowired
+    private UserSession userSession;
+
+    @Autowired
+    private UserSecurityService userSecurityService;
+
+    @Autowired
     @Qualifier(CoreRabbitService.FANOUT_QUALIFIER)
     private RabbitTemplate fanoutTemplate;
 
     private Map<String, ProjectTypeHandler> projectHandlers;
 
     public List<ProjectType> getAvailableHandlers() {
-        return projectHandlers.values().stream().map(p -> p.getDescriptor()).collect(Collectors.toList());
+        return projectHandlers.values().stream().map(ProjectTypeHandler::getDescriptor).collect(Collectors.toList());
     }
 
     public Page<Project> getAvailableProjects(Pageable p) {
-        return projectRepository.findAll(p);
+        if (userSession.isAdmin()) {
+            return projectRepository.findAll(p);
+        }
+
+        return projectRepository.findByIdIn(userSession.getUser().getRoles(), p);
     }
 
+    @PreAuthorize("hasAuthority(#id) or hasAuthority('ADMIN')")
     public Project getProject(String id) {
         Project p = projectRepository.findOne(id);
         if (p == null) {
@@ -66,6 +78,7 @@ public class ProjectService {
         return p;
     }
 
+    @PreAuthorize("hasAuthority(#id) or hasAuthority('ADMIN')")
     public Page<Artifact> getProjectArtifacts(String id, Pageable page) {
         Project project = getProject(id);
 
@@ -82,6 +95,7 @@ public class ProjectService {
         return p;
     }
 
+    @PreAuthorize("hasAuthority(#project) or hasAuthority('ADMIN')")
     public Artifact getProjectArtifact(String project, String artifact) {
         Artifact art = artifactRepository.findOne(artifact);
 
@@ -92,6 +106,7 @@ public class ProjectService {
         return art;
     }
 
+    @Transactional
     public Project createProject(Project p) {
         p.setId(null);
         p.setArtifacts(null);
@@ -100,9 +115,13 @@ public class ProjectService {
         }
         projectHandlers.get(p.getType()).validate(p);
 
-        return projectRepository.save(p);
+        Project project = projectRepository.save(p);
+
+        userSecurityService.updateUserAuthorities(project.getId());
+        return project;
     }
 
+    @PreAuthorize("hasAuthority(#projectId) or hasAuthority('ADMIN')")
     public Artifact triggerScan(String projectId, Artifact artifact) {
         Project p = projectRepository.findOne(projectId);
         if (p == null) {
@@ -130,6 +149,7 @@ public class ProjectService {
         return projectHandlers.get(p.getType()).handleWebHook(p, request, response);
     }
 
+    @PreAuthorize("hasAuthority(#projectId) or hasAuthority('ADMIN')")
     public Artifact uploadArtifact(String projectId, MultipartFile file) {
         Project p = projectRepository.findOne(projectId);
         if (p == null) {

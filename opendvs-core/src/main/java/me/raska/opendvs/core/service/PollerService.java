@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
 import me.raska.opendvs.base.model.poller.PollerAction;
@@ -31,6 +32,7 @@ public class PollerService {
     @Qualifier(PollerRabbitService.WORKER_QUALIFIER)
     private RabbitTemplate rabbitTemplate;
 
+    @Secured("ADMIN")
     @Transactional
     public PollerAction triggerAction(PollerAction action) {
         action.setId(null);
@@ -44,12 +46,14 @@ public class PollerService {
         return act;
     }
 
+    @Secured("ADMIN")
     public Page<PollerAction> getActions(Pageable pageable) {
         Page<PollerAction> actions = pollerActionRepository.findAll(pageable);
         actions.forEach(p -> p.setSteps(null)); // filter steps
         return actions;
     }
 
+    @Secured("ADMIN")
     public PollerAction getAction(String id) {
         PollerAction act = pollerActionRepository.findOne(id);
         if (act == null) {
@@ -58,6 +62,7 @@ public class PollerService {
         return act;
     }
 
+    @Secured("ADMIN")
     public Page<PollerActionStep> getActionSteps(String id, Pageable pageable) {
         PollerAction act = pollerActionRepository.findOne(id);
         if (act == null) {

@@ -1,6 +1,7 @@
 import * as JSOG from 'jsog'
 import { toggleSnackbar } from '../actions/snackbar'
 import { API_URL } from '../config.js'
+import {handleRequestErrors} from './auth'
 
 export const REQUEST_COMPONENTS = 'REQUEST_COMPONENTS'
 export const RECEIVE_COMPONENTS = 'RECEIVE_COMPONENTS'
@@ -37,7 +38,8 @@ export const receiveComponents = (data) => ({
 
 export const fetchComponents = (page) => (dispatch) => {
   dispatch(requestComponents())
-  return fetch(`${API_URL}/components?size=${page.size}&page=${page.current - 1}`)
+  return fetch(`${API_URL}/components?size=${page.size}&page=${page.current - 1}`, {credentials: 'include', redirect: 'manual'})
+  	.then(handleRequestErrors)
     .then(result=>result.json())
     .then(items=> {
     	var data = JSOG.decode(items);

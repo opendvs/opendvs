@@ -7,8 +7,11 @@ import {cyan500} from 'material-ui/styles/colors';
 import AppBar from 'material-ui/AppBar';
 import { Link } from 'react-router'
 import IconButton from 'material-ui/IconButton';
+import DropDownMenu from 'material-ui/DropDownMenu';
+import FlatButton from 'material-ui/FlatButton';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import ArrowDropRight from 'material-ui/svg-icons/navigation-arrow-drop-right';
+import ActionExitToApp from 'material-ui/svg-icons/action/exit-to-app';
 import MenuItem from 'material-ui/MenuItem';
 import Drawer from 'material-ui/Drawer';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -58,12 +61,17 @@ export class MainWrapper extends Component {
 		  }
 
 	render() {
+
+		const loggedIn = (
+				<FlatButton label="user@domain.tld" href="/logout" labelPosition="before" icon={<ActionExitToApp />} />
+		)
 		 return (
 			      <MuiThemeProvider muiTheme={muiTheme}>
 			      	<div>
 				        <AppBar
 				        onLeftIconButtonTouchTap={() => this.setState({open: true})}
 				        iconElementLeft={<IconButton><MoreVertIcon /></IconButton>}
+				        iconElementRight={loggedIn}
 				      />
 				        <Drawer
 				        docked={false}
