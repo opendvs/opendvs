@@ -1,0 +1,7 @@
+[Unit]
+Description={{ application_name }}
+
+[Service]
+ExecStart=/usr/bin/java {{ java_opts if java_opts != None else "" }} -jar {{ application_jar }} --spring.config.location={{ application_properties }}
+User={{ user }}
+Type=simple

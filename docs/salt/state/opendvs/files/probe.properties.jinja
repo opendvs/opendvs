@@ -1,0 +1,33 @@
+# Global
+server.port = {{ probe.port }}
+
+# MQ settings
+# RabbitMQ
+spring.rabbitmq.host = {{ rabbitmq.host }}
+spring.rabbitmq.port = 5672
+spring.rabbitmq.username = {{ rabbitmq.users.probe.username }}
+spring.rabbitmq.password = {{ rabbitmq.users.probe.password }}
+spring.rabbitmq.virtual-host = {{ rabbitmq.vhost }}
+spring.rabbitmq.listener.concurrency = {{ probe.concurrency.min }}
+spring.rabbitmq.listener.maxConcurrency = {{ probe.concurrency.max }}
+
+# probe
+opendvs.probe.rabbitmq.workerQueue.queueName = {{ messaging.probe.worker }}
+opendvs.probe.rabbitmq.workerQueue.exchangeName = {{ messaging.probe.worker }}
+opendvs.probe.rabbitmq.workerQueue.routingKey = {{ messaging.probe.worker }}
+
+opendvs.probe.rabbitmq.workerDeadLetterQueue.queueName = {{ messaging.probe.worker_dl }}
+opendvs.probe.rabbitmq.workerDeadLetterQueue.exchangeName = {{ messaging.probe.worker_dl }}
+opendvs.probe.rabbitmq.workerDeadLetterQueue.routingKey = {{ messaging.probe.worker_dl }}
+
+opendvs.probe.rabbitmq.coreQueue.queueName = {{ messaging.probe.core }}
+opendvs.probe.rabbitmq.coreQueue.exchangeName = {{ messaging.probe.core }}
+opendvs.probe.rabbitmq.coreQueue.routingKey = {{ messaging.probe.core }}
+
+opendvs.probe.rabbitmq.coreDeadLetterQueue.queueName = {{ messaging.probe.core_dl }}
+opendvs.probe.rabbitmq.coreDeadLetterQueue.exchangeName = {{ messaging.probe.core_dl }}
+opendvs.probe.rabbitmq.coreDeadLetterQueue.routingKey = {{ messaging.probe.core_dl }}
+
+{% for entry in probe.get("config", []) %}
+{{ entry }}
+{% endfor %}

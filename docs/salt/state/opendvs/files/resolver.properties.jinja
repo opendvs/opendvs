@@ -1,0 +1,53 @@
+# Global
+server.port = {{ resolver.port }}
+
+# MQ settings
+# RabbitMQ
+spring.rabbitmq.host = {{ rabbitmq.host }}
+spring.rabbitmq.port = 5672
+spring.rabbitmq.username = {{ rabbitmq.users.resolver.username }}
+spring.rabbitmq.password = {{ rabbitmq.users.resolver.password }}
+spring.rabbitmq.virtual-host = {{ rabbitmq.vhost }}
+
+# poller
+opendvs.poller.rabbitmq.workerQueue.queueName = {{ messaging.poller.worker }}
+opendvs.poller.rabbitmq.workerQueue.exchangeName = {{ messaging.poller.worker }}
+opendvs.poller.rabbitmq.workerQueue.routingKey = {{ messaging.poller.worker }}
+
+opendvs.poller.rabbitmq.workerDeadLetterQueue.queueName = {{ messaging.poller.worker_dl }}
+opendvs.poller.rabbitmq.workerDeadLetterQueue.exchangeName = {{ messaging.poller.worker_dl }}
+opendvs.poller.rabbitmq.workerDeadLetterQueue.routingKey = {{ messaging.poller.worker_dl }}
+
+opendvs.poller.rabbitmq.coreQueue.queueName = {{ messaging.poller.core }}
+opendvs.poller.rabbitmq.coreQueue.exchangeName = {{ messaging.poller.core }}
+opendvs.poller.rabbitmq.coreQueue.routingKey = {{ messaging.poller.core }}
+
+opendvs.poller.rabbitmq.coreDeadLetterQueue.queueName = {{ messaging.poller.core_dl }}
+opendvs.poller.rabbitmq.coreDeadLetterQueue.exchangeName = {{ messaging.poller.core_dl }}
+opendvs.poller.rabbitmq.coreDeadLetterQueue.routingKey = {{ messaging.poller.core_dl }}
+
+# resolver
+opendvs.resolver.rabbitmq.queue.queueName = {{ messaging.resolver }}
+opendvs.resolver.rabbitmq.queue.exchangeName = {{ messaging.resolver }}
+opendvs.resolver.rabbitmq.queue.routing_key = {{ messaging.resolver }}
+
+opendvs.resolver.rabbitmq.deadLetterQueue.queueName = {{ messaging.resolver_dl }}
+opendvs.resolver.rabbitmq.deadLetterQueue.exchangeName = {{ messaging.resolver_dl }}
+opendvs.resolver.rabbitmq.deadLetterQueue.routing_key = {{ messaging.resolver_dl }}
+
+# core
+opendvs.core.rabbitmq.fanout.queueName = {{ messaging.fanout }}
+opendvs.core.rabbitmq.fanout.exchangeName = {{ messaging.fanout }}
+
+# JPA
+spring.datasource.url = jdbc:mysql://{{ mysql.host }}/{{ mysql.database }}
+spring.datasource.username = {{ mysql.users.resolver.username }}
+spring.datasource.password = {{ mysql.users.resolver.password }}
+spring.datasource.driver-class-name = com.mysql.jdbc.Driver
+spring.datasource.testOnBorrow = true
+spring.datasource.validationQuery = SELECT 1
+spring.jpa.generate-ddl = false
+
+{% for entry in resolver.get("config", []) %}
+{{ entry }}
+{% endfor %}

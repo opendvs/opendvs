@@ -1,0 +1,87 @@
+# Global
+server.port = {{ core.port }}
+
+# Jackson
+spring.jackson.serialization.fail-on-empty-beans=false
+
+# MQ settings
+# RabbitMQ
+spring.rabbitmq.host = {{ rabbitmq.host }}
+spring.rabbitmq.port = 5672
+spring.rabbitmq.username = {{ rabbitmq.users.core.username }}
+spring.rabbitmq.password = {{ rabbitmq.users.core.password }}
+spring.rabbitmq.virtual-host = {{ rabbitmq.vhost }}
+
+
+# probe
+opendvs.probe.rabbitmq.workerQueue.queueName = {{ messaging.probe.worker }}
+opendvs.probe.rabbitmq.workerQueue.exchangeName = {{ messaging.probe.worker }} 
+opendvs.probe.rabbitmq.workerQueue.routingKey = {{ messaging.probe.worker }} 
+
+opendvs.probe.rabbitmq.workerDeadLetterQueue.queueName = {{ messaging.probe.worker_dl }}
+opendvs.probe.rabbitmq.workerDeadLetterQueue.exchangeName = {{ messaging.probe.worker_dl }}
+opendvs.probe.rabbitmq.workerDeadLetterQueue.routingKey = {{ messaging.probe.worker_dl }}
+
+opendvs.probe.rabbitmq.coreQueue.queueName = {{ messaging.probe.core }}
+opendvs.probe.rabbitmq.coreQueue.exchangeName = {{ messaging.probe.core }}
+opendvs.probe.rabbitmq.coreQueue.routingKey = {{ messaging.probe.core }} 
+
+opendvs.probe.rabbitmq.coreDeadLetterQueue.queueName = {{ messaging.probe.core_dl }}
+opendvs.probe.rabbitmq.coreDeadLetterQueue.exchangeName = {{ messaging.probe.core_dl }}
+opendvs.probe.rabbitmq.coreDeadLetterQueue.routingKey = {{ messaging.probe.core_dl }}
+
+# poller
+opendvs.poller.rabbitmq.workerQueue.queueName = {{ messaging.poller.worker }}
+opendvs.poller.rabbitmq.workerQueue.exchangeName = {{ messaging.poller.worker }} 
+opendvs.poller.rabbitmq.workerQueue.routingKey = {{ messaging.poller.worker }} 
+
+opendvs.poller.rabbitmq.workerDeadLetterQueue.queueName = {{ messaging.poller.worker_dl }}
+opendvs.poller.rabbitmq.workerDeadLetterQueue.exchangeName = {{ messaging.poller.worker_dl }}
+opendvs.poller.rabbitmq.workerDeadLetterQueue.routingKey = {{ messaging.poller.worker_dl }}
+
+opendvs.poller.rabbitmq.coreQueue.queueName = {{ messaging.poller.core }}
+opendvs.poller.rabbitmq.coreQueue.exchangeName = {{ messaging.poller.core }}
+opendvs.poller.rabbitmq.coreQueue.routingKey = {{ messaging.poller.core }} 
+
+opendvs.poller.rabbitmq.coreDeadLetterQueue.queueName = {{ messaging.poller.core_dl }}
+opendvs.poller.rabbitmq.coreDeadLetterQueue.exchangeName = {{ messaging.poller.core_dl }}
+opendvs.poller.rabbitmq.coreDeadLetterQueue.routingKey = {{ messaging.poller.core_dl }}
+
+# resolver
+opendvs.resolver.rabbitmq.queue.queueName = {{ messaging.resolver }}
+opendvs.resolver.rabbitmq.queue.exchangeName = {{ messaging.resolver }}
+opendvs.resolver.rabbitmq.queue.routing_key = {{ messaging.resolver }}
+
+opendvs.resolver.rabbitmq.deadLetterQueue.queueName = {{ messaging.resolver_dl }}
+opendvs.resolver.rabbitmq.deadLetterQueue.exchangeName = {{ messaging.resolver_dl }}
+opendvs.resolver.rabbitmq.deadLetterQueue.routing_key = {{ messaging.resolver_dl }}
+
+# core
+opendvs.core.rabbitmq.fanout.queueName = {{ messaging.fanout }}
+opendvs.core.rabbitmq.fanout.exchangeName = {{ messaging.fanout }}
+
+# Filesystem handler
+project.handler.filesystem.dir = {{ core.filesystem_handler_dir }}
+
+# JPA
+spring.datasource.url = jdbc:mysql://{{ mysql.host }}/{{ mysql.database }}
+spring.datasource.username = {{ mysql.users.core.username }}
+spring.datasource.password = {{ mysql.users.core.password }}
+spring.datasource.driver-class-name = com.mysql.jdbc.Driver
+spring.datasource.testOnBorrow = true
+spring.datasource.validationQuery = SELECT 1
+spring.jpa.generate-ddl = false
+
+# Security
+security.oauth2.client.clientId={{ idp.client }}
+security.oauth2.client.clientSecret={{ idp.secret }}
+security.oauth2.client.accessTokenUri={{ idp.token_url }}
+security.oauth2.client.userAuthorizationUri={{ idp.auth_url }}
+security.oauth2.resource.userInfoUri={{ idp.user_url }}
+security.oauth2.resource.id={{ idp.resource }}
+security.oauth2.claim.identifier={{ idp.claim_identifier }}
+
+
+{% for entry in core.get("config", []) %}
+{{ entry }}
+{% endfor %}

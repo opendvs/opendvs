@@ -1,0 +1,33 @@
+# Global
+server.port = {{ poller.port }}
+
+# MQ settings
+# RabbitMQ
+spring.rabbitmq.host = {{ rabbitmq.host }}
+spring.rabbitmq.port = 5672
+spring.rabbitmq.username = {{ rabbitmq.users.poller.username }}
+spring.rabbitmq.password = {{ rabbitmq.users.poller.password }}
+spring.rabbitmq.virtual-host = {{ rabbitmq.vhost }}
+spring.rabbitmq.listener.concurrency = {{ poller.concurrency.min }}
+spring.rabbitmq.listener.maxConcurrency = {{ poller.concurrency.max }}
+
+# poller
+opendvs.poller.rabbitmq.workerQueue.queueName = {{ messaging.poller.worker }}
+opendvs.poller.rabbitmq.workerQueue.exchangeName = {{ messaging.poller.worker }}
+opendvs.poller.rabbitmq.workerQueue.routingKey = {{ messaging.poller.worker }}
+
+opendvs.poller.rabbitmq.workerDeadLetterQueue.queueName = {{ messaging.poller.worker_dl }}
+opendvs.poller.rabbitmq.workerDeadLetterQueue.exchangeName = {{ messaging.poller.worker_dl }}
+opendvs.poller.rabbitmq.workerDeadLetterQueue.routingKey = {{ messaging.poller.worker_dl }}
+
+opendvs.poller.rabbitmq.coreQueue.queueName = {{ messaging.poller.core }}
+opendvs.poller.rabbitmq.coreQueue.exchangeName = {{ messaging.poller.core }}
+opendvs.poller.rabbitmq.coreQueue.routingKey = {{ messaging.poller.core }}
+
+opendvs.poller.rabbitmq.coreDeadLetterQueue.queueName = {{ messaging.poller.core_dl }}
+opendvs.poller.rabbitmq.coreDeadLetterQueue.exchangeName = {{ messaging.poller.core_dl }}
+opendvs.poller.rabbitmq.coreDeadLetterQueue.routingKey = {{ messaging.poller.core_dl }}
+
+{% for entry in poller.get("config", []) %}
+{{ entry }}
+{% endfor %}
