@@ -15,5 +15,6 @@
 		<module>opendvs-worker-probe</module>
 		<module>opendvs-worker-poller</module>
 		<module>opendvs-resolver</module>
+		<module>opendvs-react-ui</module>
 	</modules>
 </project>

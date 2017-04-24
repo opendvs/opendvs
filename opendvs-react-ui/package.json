@@ -1,10 +1,10 @@
 {
   "name": "opendvs-react-ui",
   "version": "0.0.1",
-  "description": "",
+  "description": "OpenDVS UI written in React",
   "main": "index.js",
   "author": "Lukas Raska",
-  "license": "TBA",
+  "license": "Apache-2.0",
   "scripts": {
     "start": "webpack-dev-server --config webpack-dev-server.config.js --progress --inline --colors",
     "build": "webpack --config webpack-production.config.js --progress --colors"

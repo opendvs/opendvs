@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux'
-
+import {WS_URL} from '../config'
 import { handleArtifactUpdate, handleResolvedComponents } from '../actions/project'
 import {fetchUserInfo} from '../actions/auth'
 import * as JSOG from 'jsog'
@@ -38,7 +38,7 @@ export class MainWrapper extends Component {
 		    	open: false,
 		    };
 
-		    var socket = new SockJS('http://localhost:8080/event');
+		    var socket = new SockJS(WS_URL);
 		    var stompClient = Stomp.over(socket);
 
 		    props.dispatch(fetchUserInfo())
