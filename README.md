@@ -66,10 +66,16 @@ See [Architecture](docs/Architecture.md).
 ## Extending functionality
 * [Implementing custom Probes](docs/CustomProbes.md).
 * [Implementing custom Pollers](docs/CustomPollers.md).
+* [Implementing custom Project Type](docs/CustomProjectType.md).
 
 ## Prefetching CVE data
 In order to properly detect vulnerabilities, you need to ensure CVE database is fetched first (FIXME). After platform is up and running, trigger following API endpoint with admin user to force CVE synchronization: `/api/v1/vulnerabilities/cve/trigger?modifier=<YEAR>`
+
 ## Testing the functionality
 Few test binaries are supplied with the source code (`docs/dist` directory) to verify proper functionality:
 * *vulnerable.zip* - detect vulnerable Maven package, CVE is from 2017 dataset
 * TODO
+
+## API
+For automated platform usage, you are able to use personal API tokens that will allow you to bypass authentication. The token has to be appended to each requests as `X-API` HTTP header.
+Documentation for platform is generated automatically by Swagger and is accessible on uri `/api/v1/swagger.json` for every authenticated user.

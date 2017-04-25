@@ -4,7 +4,9 @@ import java.util.Set;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -19,7 +21,10 @@ public class User {
     private String id;
 
     @JsonIgnore
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> roles;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<ApiToken> apiTokens;
 }

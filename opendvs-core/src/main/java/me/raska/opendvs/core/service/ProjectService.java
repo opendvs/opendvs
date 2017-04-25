@@ -32,6 +32,7 @@ import me.raska.opendvs.core.dto.ArtifactRepository;
 import me.raska.opendvs.core.dto.PollerActionRepository;
 import me.raska.opendvs.core.dto.ProjectRepository;
 import me.raska.opendvs.core.exception.InvalidRequestException;
+import me.raska.opendvs.core.exception.NotFoundException;
 
 @Slf4j
 @Service
@@ -73,7 +74,7 @@ public class ProjectService {
     public Project getProject(String id) {
         Project p = projectRepository.findOne(id);
         if (p == null) {
-            throw new InvalidRequestException("Project doesn't exist");
+            throw new NotFoundException("Project doesn't exist");
         }
         return p;
     }
@@ -100,7 +101,7 @@ public class ProjectService {
         Artifact art = artifactRepository.findOne(artifact);
 
         if (art == null || art.getProject() == null || !project.equals(art.getProject().getId())) {
-            throw new InvalidRequestException("Artifact doesn't exist or doesn't belong to this project");
+            throw new NotFoundException("Artifact doesn't exist or doesn't belong to this project");
         }
 
         return art;
@@ -125,7 +126,7 @@ public class ProjectService {
     public Artifact triggerScan(String projectId, Artifact artifact) {
         Project p = projectRepository.findOne(projectId);
         if (p == null) {
-            throw new InvalidRequestException("Project doesn't exist");
+            throw new NotFoundException("Project doesn't exist");
         }
 
         if (!projectHandlers.containsKey(p.getType())) {
@@ -139,7 +140,7 @@ public class ProjectService {
     public Artifact handleWebHook(String projectId, HttpServletRequest request, HttpServletResponse response) {
         Project p = projectRepository.findOne(projectId);
         if (p == null) {
-            throw new InvalidRequestException("Project doesn't exist");
+            throw new NotFoundException("Project doesn't exist");
         }
 
         if (!projectHandlers.containsKey(p.getType())) {
@@ -153,7 +154,7 @@ public class ProjectService {
     public Artifact uploadArtifact(String projectId, MultipartFile file) {
         Project p = projectRepository.findOne(projectId);
         if (p == null) {
-            throw new InvalidRequestException("Project doesn't exist");
+            throw new NotFoundException("Project doesn't exist");
         }
 
         if (!projectHandlers.containsKey(p.getType())) {

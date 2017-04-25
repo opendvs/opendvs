@@ -88,6 +88,7 @@ export class MainWrapper extends Component {
 					        	<Link to="/components/actions"><MenuItem>Actions</MenuItem></Link>
 				        ]}>Components</MenuItem>
 				        <Link to="/vulnerabilities"><MenuItem>Vulnerabilities</MenuItem></Link>
+				        <Link to="/api"><MenuItem>API</MenuItem></Link>
 				      </Drawer>
 
 					      	<div className="container">

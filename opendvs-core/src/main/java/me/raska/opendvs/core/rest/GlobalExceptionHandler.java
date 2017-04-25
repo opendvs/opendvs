@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import me.raska.opendvs.core.exception.ApiException;
 import me.raska.opendvs.core.exception.ApiException.ValidationError;
 import me.raska.opendvs.core.exception.InvalidRequestException;
+import me.raska.opendvs.core.exception.NotFoundException;
 import me.raska.opendvs.core.exception.UnsupportedTypeActionException;
 
 @Slf4j
