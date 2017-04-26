@@ -33,6 +33,7 @@ import me.raska.opendvs.core.dto.PollerActionRepository;
 import me.raska.opendvs.core.dto.ProjectRepository;
 import me.raska.opendvs.core.exception.InvalidRequestException;
 import me.raska.opendvs.core.exception.NotFoundException;
+import me.raska.opendvs.core.rest.filtering.Filterable;
 
 @Slf4j
 @Service
@@ -62,7 +63,8 @@ public class ProjectService {
         return projectHandlers.values().stream().map(ProjectTypeHandler::getDescriptor).collect(Collectors.toList());
     }
 
-    public Page<Project> getAvailableProjects(Pageable p) {
+    public Page<Project> getAvailableProjects(Pageable p, Filterable filter) {
+        // TODO: handle filterable
         if (userSession.isAdmin()) {
             return projectRepository.findAll(p);
         }
@@ -80,7 +82,8 @@ public class ProjectService {
     }
 
     @PreAuthorize("hasAuthority(#id) or hasAuthority('ADMIN')")
-    public Page<Artifact> getProjectArtifacts(String id, Pageable page) {
+    public Page<Artifact> getProjectArtifacts(String id, Pageable page, Filterable filter) {
+        // TODO: handle filterable
         Project project = getProject(id);
 
         Page<Artifact> p = artifactRepository.findByProjectOrderByInitiatedDesc(project, page);

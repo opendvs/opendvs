@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import me.raska.opendvs.base.model.artifact.Artifact;
 import me.raska.opendvs.base.model.project.Project;
 import me.raska.opendvs.base.model.project.ProjectType;
+import me.raska.opendvs.core.rest.filtering.Filterable;
 import me.raska.opendvs.core.service.ProjectService;
 
 @CrossOrigin
@@ -35,8 +36,8 @@ public class ProjectRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public Page<Project> getAvailableProjects(Pageable p) {
-        return projectService.getAvailableProjects(p);
+    public Page<Project> getAvailableProjects(Pageable p, Filterable f) {
+        return projectService.getAvailableProjects(p, f);
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -50,8 +51,8 @@ public class ProjectRestController {
     }
 
     @RequestMapping(value = "/{id}/artifacts", method = RequestMethod.GET)
-    public Page<Artifact> getProjectArtifacts(@PathVariable("id") String projectId, Pageable p) {
-        return projectService.getProjectArtifacts(projectId, p);
+    public Page<Artifact> getProjectArtifacts(@PathVariable("id") String projectId, Pageable p, Filterable f) {
+        return projectService.getProjectArtifacts(projectId, p, f);
     }
 
     @RequestMapping(value = "/{id}/artifacts/{artifactId}", method = RequestMethod.GET)

@@ -7,13 +7,15 @@ import org.springframework.stereotype.Service;
 
 import me.raska.opendvs.base.model.Component;
 import me.raska.opendvs.core.dto.ComponentRepository;
+import me.raska.opendvs.core.rest.filtering.Filterable;
 
 @Service
 public class ComponentService {
     @Autowired
     private ComponentRepository componentRepository;
 
-    public Page<Component> getComponents(Pageable page) {
+    public Page<Component> getComponents(Pageable page, Filterable filter) {
+        // TODO: handle filterable
         return componentRepository.findAll(page);
     }
 

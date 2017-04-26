@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import me.raska.opendvs.base.model.Component;
+import me.raska.opendvs.core.rest.filtering.Filterable;
 import me.raska.opendvs.core.service.ComponentService;
 
 @CrossOrigin
@@ -21,8 +22,8 @@ public class ComponentRestController {
     private ComponentService componentService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public Page<Component> getComponents(Pageable pageable) {
-        return componentService.getComponents(pageable);
+    public Page<Component> getComponents(Pageable pageable, Filterable filter) {
+        return componentService.getComponents(pageable, filter);
     }
 
     // use detail endpoint to avoid dots issue

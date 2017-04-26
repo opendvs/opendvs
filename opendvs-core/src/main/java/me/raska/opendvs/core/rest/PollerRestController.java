@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import me.raska.opendvs.base.model.poller.PollerAction;
 import me.raska.opendvs.base.model.poller.PollerActionStep;
+import me.raska.opendvs.core.rest.filtering.Filterable;
 import me.raska.opendvs.core.service.PollerService;
 
 @CrossOrigin
@@ -23,8 +24,8 @@ public class PollerRestController {
     private PollerService pollerService;
 
     @RequestMapping(value = "/actions", method = RequestMethod.GET)
-    public Page<PollerAction> getActions(Pageable pageable) {
-        return pollerService.getActions(pageable);
+    public Page<PollerAction> getActions(Pageable pageable, Filterable filter) {
+        return pollerService.getActions(pageable, filter);
     }
 
     @RequestMapping(value = "/actions", method = RequestMethod.POST)
@@ -40,8 +41,8 @@ public class PollerRestController {
     }
 
     @RequestMapping(value = "/action/{id}/steps", method = RequestMethod.GET)
-    public Page<PollerActionStep> getActionSteps(@PathVariable("id") String id, Pageable pageable) {
-        return pollerService.getActionSteps(id, pageable);
+    public Page<PollerActionStep> getActionSteps(@PathVariable("id") String id, Pageable pageable, Filterable filter) {
+        return pollerService.getActionSteps(id, pageable, filter);
     }
 
 }

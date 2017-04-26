@@ -19,6 +19,7 @@ import me.raska.opendvs.base.poller.amqp.PollerRabbitService;
 import me.raska.opendvs.core.dto.PollerActionRepository;
 import me.raska.opendvs.core.dto.PollerActionStepRepository;
 import me.raska.opendvs.core.exception.InvalidRequestException;
+import me.raska.opendvs.core.rest.filtering.Filterable;
 
 @Service
 public class PollerService {
@@ -47,7 +48,8 @@ public class PollerService {
     }
 
     @Secured("ADMIN")
-    public Page<PollerAction> getActions(Pageable pageable) {
+    public Page<PollerAction> getActions(Pageable pageable, Filterable filter) {
+        // TODO: handle filterable
         Page<PollerAction> actions = pollerActionRepository.findAll(pageable);
         actions.forEach(p -> p.setSteps(null)); // filter steps
         return actions;
@@ -63,7 +65,8 @@ public class PollerService {
     }
 
     @Secured("ADMIN")
-    public Page<PollerActionStep> getActionSteps(String id, Pageable pageable) {
+    public Page<PollerActionStep> getActionSteps(String id, Pageable pageable, Filterable filter) {
+        // TODO: handle filterable
         PollerAction act = pollerActionRepository.findOne(id);
         if (act == null) {
             throw new InvalidRequestException("Poller action doesn't exist");
