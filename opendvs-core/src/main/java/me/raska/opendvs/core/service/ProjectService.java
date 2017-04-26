@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +38,7 @@ import me.raska.opendvs.core.dto.ProjectRepository;
 import me.raska.opendvs.core.exception.InvalidRequestException;
 import me.raska.opendvs.core.exception.NotFoundException;
 import me.raska.opendvs.core.rest.filtering.Filterable;
+import me.raska.opendvs.core.rest.filtering.FilterableSpecification;
 
 @Slf4j
 @Service
@@ -54,6 +59,9 @@ public class ProjectService {
     private UserSecurityService userSecurityService;
 
     @Autowired
+    private FilterableSpecification filterableSpec;
+
+    @Autowired
     @Qualifier(CoreRabbitService.FANOUT_QUALIFIER)
     private RabbitTemplate fanoutTemplate;
 
@@ -64,12 +72,13 @@ public class ProjectService {
     }
 
     public Page<Project> getAvailableProjects(Pageable p, Filterable filter) {
-        // TODO: handle filterable
         if (userSession.isAdmin()) {
-            return projectRepository.findAll(p);
+            return projectRepository.findAll(filterableSpec.handleEntityFiltering(Project.class, filter), p);
         }
 
-        return projectRepository.findByIdIn(userSession.getUser().getRoles(), p);
+        final Map<String, Set<String>> inMap = new HashMap<>();
+        inMap.put("id", userSession.getUser().getRoles());
+        return projectRepository.findAll(filterableSpec.handleEntityFiltering(Project.class, filter, null, inMap), p);
     }
 
     @PreAuthorize("hasAuthority(#id) or hasAuthority('ADMIN')")
@@ -83,10 +92,13 @@ public class ProjectService {
 
     @PreAuthorize("hasAuthority(#id) or hasAuthority('ADMIN')")
     public Page<Artifact> getProjectArtifacts(String id, Pageable page, Filterable filter) {
-        // TODO: handle filterable
         Project project = getProject(id);
 
-        Page<Artifact> p = artifactRepository.findByProjectOrderByInitiatedDesc(project, page);
+        final Map<String, Object> whereMap = new HashMap<>();
+        whereMap.put("project", project);
+
+        Pageable pageable = new PageRequest(page.getPageNumber(), page.getPageSize(), new Sort(Direction.DESC, "initiated"));
+        Page<Artifact> p = artifactRepository.findAll(filterableSpec.handleEntityFiltering(Artifact.class, filter, whereMap), pageable);
 
         // cleanup
         p.getContent().forEach(a -> {
