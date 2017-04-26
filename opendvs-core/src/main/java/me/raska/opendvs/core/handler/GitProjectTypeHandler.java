@@ -21,6 +21,7 @@ import me.raska.opendvs.base.model.artifact.Artifact.Type;
 import me.raska.opendvs.base.model.probe.ProbeAction;
 import me.raska.opendvs.base.model.project.Project;
 import me.raska.opendvs.base.model.project.ProjectType;
+import me.raska.opendvs.base.model.project.ProjectType.FieldType;
 import me.raska.opendvs.base.probe.amqp.ProbeRabbitService;
 import me.raska.opendvs.core.dto.ArtifactRepository;
 import me.raska.opendvs.core.dto.ProbeActionRepository;
@@ -66,9 +67,9 @@ public class GitProjectTypeHandler implements ProjectTypeHandler {
     private void init() {
         List<ProjectType.Property> properties = new ArrayList<>();
         properties.add(ProjectType.Property.builder().key("uri").name("Git URI")
-                .description("URI for project, supports both SSH and HTTPS transport").build());
+                .description("URI for project, supports both SSH and HTTPS transport").type(FieldType.TEXT).build());
         properties.add(ProjectType.Property.builder().key("private_key").name("SSH Private key")
-                .description("Private key in PEM format in case project is not publicly readable").build());
+                .description("Private key in PEM format in case project is not publicly readable").type(FieldType.TEXTAREA).build());
 
         descriptor = ProjectType.builder().id("git").name("Git project type")
                 .description("Remote git projects, check is triggered per specified filter").properties(properties)
@@ -101,7 +102,7 @@ public class GitProjectTypeHandler implements ProjectTypeHandler {
         art.setType(Type.source);
         art.setUri(project.getTypeProperties().get("uri"));
         art.setSourceType(project.getType());
-        art.setName(art.getIdentity().substring(0, 7));
+        art.setName(art.getIdentity());
         art.setProject(project);
         art.setComponents(null);
         art.setId(null);
@@ -118,6 +119,7 @@ public class GitProjectTypeHandler implements ProjectTypeHandler {
         // don't pass the project to the queue
         art.setProject(null);
         art.setProbeAction(act);
+        act.setProjectTypeProperties(project.getTypeProperties());
 
         rabbitTemplate.convertAndSend(act);
         return art;

@@ -36,11 +36,15 @@ class AddProjectDialog extends Component {
 	    var typeProperties = [];
 	    if (selectedType.properties) {
 	        selectedType.properties.forEach((it) => {
+	        	const multiline = (it.type == 'TEXTAREA')
+	        	const rows = (it.type == 'TEXTAREA') ? 8 : 1;
 	            typeProperties.push(
 	      		      <TextField key={it.name}
 			      	  floatingLabelText={it.name}
 			          hintText={it.description}
 			          fullWidth={true}
+	      		      multiLine={multiline}
+	      		      rows={rows}
 	      		      defaultValue={project.typeProperties[it.key]}
 	      		      onChange={(evt) => dispatch(updateFormPropertyField(it.key, evt.target.value)) }  />
 	    		)

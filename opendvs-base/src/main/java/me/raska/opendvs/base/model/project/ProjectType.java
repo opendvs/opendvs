@@ -17,8 +17,14 @@ public class ProjectType {
     @Builder
     @Data
     public static class Property {
-        private String key;
-        private String name;
-        private String description;
+        private final String key;
+        private final String name;
+        private final String description;
+
+        private final FieldType type;
+    }
+
+    public enum FieldType {
+        TEXT, TEXTAREA
     }
 }
