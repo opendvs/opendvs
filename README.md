@@ -41,12 +41,14 @@ location /api {
 }
 ```
 
+> If you want to upload larger files (>2M), you will need to change nginx property `client_max_body_size`, otherwise large uploads will fail.
+
 ### Salt Formulas
 For easier platform deployment, SaltStack states are available inside `docs/salt/state`. Appropriate pillars are available in `docs/salt/pillar`. Currently supported OS are Ubuntu and CentOS, systemd is currently only supported init.
 
 All parts of platform can be applied by triggering highstate for `opendvs.<component>` state. All required runtime dependencies will be installed (as per supplied pillars), except MQ broker and SQL database.
 
-> For installing Oracle Java you need to accept *Oracle Binary Code License Agreement* by specifying `java:accept_licence: True* pillar. Otherwise you need to ensure Java is installed on target machine!
+> For installing Oracle Java you need to accept **Oracle Binary Code License Agreement** by specifying `java:accept_licence: True` pillar. Otherwise you need to ensure Java is installed on target machine!
 
 #### RabbitMQ
 RabbitMQ can be installed on separate server, all necessary configuration parameters will be set up after installation (users, virtual hosts and management interface).
@@ -54,7 +56,7 @@ RabbitMQ can be installed on separate server, all necessary configuration parame
 MySQL can be installed on separate server, database and users will be provisioned after installation.
 
 #### Nginx
-Nginx is requirement for `opendvs-ui` component and has to reside on same server (due to static files serving). Correct proxying on required endpoints will be configured according to supplied pillars. 
+Nginx is requirement for `opendvs-react-ui` component and has to reside on same server (due to static files serving). Correct proxying on required endpoints will be configured according to supplied pillars. 
 
 
 ### Current limitations
@@ -66,7 +68,7 @@ See [Architecture](docs/Architecture.md).
 ## Extending functionality
 * [Implementing custom Probes](docs/CustomProbes.md).
 * [Implementing custom Pollers](docs/CustomPollers.md).
-* [Implementing custom Project Type](docs/CustomProjectType.md).
+* [Implementing custom Project Types](docs/CustomProjectTypes.md).
 
 ## Prefetching CVE data
 In order to properly detect vulnerabilities, you need to ensure CVE database is fetched first (FIXME). After platform is up and running, trigger following API endpoint with admin user to force CVE synchronization: `/api/v1/vulnerabilities/cve/trigger?modifier=<YEAR>`
@@ -74,10 +76,21 @@ In order to properly detect vulnerabilities, you need to ensure CVE database is 
 ## Testing the functionality
 Few test binaries are supplied with the source code (`docs/dist` directory) to verify proper functionality:
 * *maven-vulnerable.zip* - detect vulnerable Maven package, requires CVE-2017 dataset
-* TODO
+* *nodejs.zip* - detect NPM-based dependencies
+* *nodejs-vulnerable.zip* - detect vulnerable Node.js dependency, requires CVE-2014 dataset - TODO verify
+* *https://github.com/bkielczewski/example-spring-boot-mvc.git* - can be used as source for Git-type projects (unauthenticated)
+
+> Any secured Git project can be used for testing Git-type projects, you just need to input private key in PEM format (as used by OpenSSH) on project creation. This necessarily doesn't have to be your private key, but can be *Deploy Key* as specified by GitHub/GitLab.
 
 ## API
 For automated platform usage, you are able to use personal API tokens that will allow you to bypass authentication. The token has to be appended to each requests as `X-API` HTTP header.
 Documentation for platform is generated automatically by Swagger and is accessible on uri `/api/v1/swagger.json` for every authenticated user.
 
 > If required, Swagger endpoint can be adjusted by changing property `springfox.documentation.swagger.v2.path` in `application.properties`
+
+### Filtering and sorting
+> All page responses accept `page=<number>` GET attribute to switch between accessible pages
+
+Sorting is done as per Spring Data Pageable definition, you can set sort GET parameter (`sort=<FIELD>,<ASC|DESC>`) to each request that returns page structure. For example `/api/v1/projects?sort=name,DESC` returns projects sorted by name, descending.
+
+Filtering is achieved by custom implementation and all queries are propagated towards underlying DB engine with LIKE operation, you can set filter GET parameter (`filter.<FIELD>=<VALUE>`) to each request that returns page structure. For example `/api/v1/projects?filter.name=git%25` decodes as `git%` filter (where % is wildcard sign for MySQL database) and returns all projects whose name starts with 'git'.
