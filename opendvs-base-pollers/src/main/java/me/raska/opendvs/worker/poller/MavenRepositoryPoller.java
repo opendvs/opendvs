@@ -39,16 +39,12 @@ public class MavenRepositoryPoller implements NativePoller {
 
     // todo: get from context
     private String repo = "https://repo1.maven.org/maven2/";
-    private DocumentBuilder docBuilder;
     private XPathExpression artifactIdXPath;
     private XPathExpression groupIdXPath;;
     private XPathExpression latestVersionXPath;
     private XPathExpression lastUpdateXPath;
 
     public MavenRepositoryPoller() throws Exception {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        this.docBuilder = dbFactory.newDocumentBuilder();
-
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
         artifactIdXPath = xpath.compile("/metadata/artifactId/text()");
@@ -107,6 +103,9 @@ public class MavenRepositoryPoller implements NativePoller {
         act.setId(action.getId());
 
         try {
+            // TODO: figure out if it's really thread-unsafe - 'FWK005 parse may not be called while parsing.'
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = dbFactory.newDocumentBuilder();
             org.w3c.dom.Document doc = docBuilder.parse(new URL(baseUrl + "maven-metadata.xml").openStream());
             String artId = (String) artifactIdXPath.evaluate(doc, XPathConstants.STRING);
             String groupId = (String) groupIdXPath.evaluate(doc, XPathConstants.STRING);

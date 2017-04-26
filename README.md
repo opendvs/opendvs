@@ -73,7 +73,7 @@ In order to properly detect vulnerabilities, you need to ensure CVE database is 
 
 ## Testing the functionality
 Few test binaries are supplied with the source code (`docs/dist` directory) to verify proper functionality:
-* *vulnerable.zip* - detect vulnerable Maven package, CVE is from 2017 dataset
+* *maven-vulnerable.zip* - detect vulnerable Maven package, requires CVE-2017 dataset
 * TODO
 
 ## API
