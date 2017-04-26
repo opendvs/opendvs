@@ -97,8 +97,13 @@ public class ProjectService {
         final Map<String, Object> whereMap = new HashMap<>();
         whereMap.put("project", project);
 
-        Pageable pageable = new PageRequest(page.getPageNumber(), page.getPageSize(), new Sort(Direction.DESC, "initiated"));
-        Page<Artifact> p = artifactRepository.findAll(filterableSpec.handleEntityFiltering(Artifact.class, filter, whereMap), pageable);
+        Pageable pageable = page;
+        if (page.getSort() == null) {
+            pageable = new PageRequest(page.getPageNumber(), page.getPageSize(), new Sort(Direction.DESC, "initiated"));
+        }
+
+        Page<Artifact> p = artifactRepository
+                .findAll(filterableSpec.handleEntityFiltering(Artifact.class, filter, whereMap), pageable);
 
         // cleanup
         p.getContent().forEach(a -> {
