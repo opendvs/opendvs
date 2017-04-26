@@ -18,12 +18,12 @@ export const handleRequestErrors = (response, dispatch) => {
 		window.location.href = '/#/errors/403'
 		return null
 	}
-	
+
 	if (response.status >= 400) {
 		response.json().then(response => {
-	    	dispatch(toggleSnackbarError(true, response.message));
+	    	dispatch(toggleSnackbarError(true, response.message))
 	}).catch(error => 
-	    	dispatch(toggleSnackbarError(true, "Internal server error, " + error)))
+	    	dispatch(toggleSnackbarError(true, response.statusText)))
     	return null;
 	}
 
