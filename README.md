@@ -79,3 +79,5 @@ Few test binaries are supplied with the source code (`docs/dist` directory) to v
 ## API
 For automated platform usage, you are able to use personal API tokens that will allow you to bypass authentication. The token has to be appended to each requests as `X-API` HTTP header.
 Documentation for platform is generated automatically by Swagger and is accessible on uri `/api/v1/swagger.json` for every authenticated user.
+
+> If required, Swagger endpoint can be adjusted by changing property `springfox.documentation.swagger.v2.path` in `application.properties`
