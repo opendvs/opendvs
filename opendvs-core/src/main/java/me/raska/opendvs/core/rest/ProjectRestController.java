@@ -68,7 +68,7 @@ public class ProjectRestController {
     }
 
     @RequestMapping(value = "/{id}/trigger", method = RequestMethod.POST)
-    public Artifact triggetScan(@PathVariable("id") String projectId, @RequestBody Artifact artifact) {
+    public Artifact triggerScan(@PathVariable("id") String projectId, @RequestBody Artifact artifact) {
         return projectService.triggerScan(projectId, artifact);
     }
 

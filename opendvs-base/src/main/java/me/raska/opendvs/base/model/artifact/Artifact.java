@@ -67,7 +67,7 @@ public class Artifact {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+    @JsonIgnoreProperties({ "projectTypeProperties", "hibernateLazyInitializer", "handler" })
     @OneToOne(fetch = FetchType.LAZY, optional = true, mappedBy = "artifact")
     private ProbeAction probeAction;
 

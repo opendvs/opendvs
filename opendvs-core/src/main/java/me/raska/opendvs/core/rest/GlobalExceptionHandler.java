@@ -5,12 +5,14 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,7 +32,8 @@ import me.raska.opendvs.core.exception.UnsupportedTypeActionException;
 public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({ InvalidRequestException.class, HttpMessageNotReadableException.class,
-            HttpMediaTypeException.class, UnsupportedTypeActionException.class })
+            HttpMediaTypeException.class, UnsupportedTypeActionException.class,
+            HttpRequestMethodNotSupportedException.class, DataIntegrityViolationException.class })
     public ApiException handleApiClientException(Exception ex) {
         return getApiException(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), null);
     }

@@ -3,6 +3,7 @@ package me.raska.opendvs.worker.source;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Map;
 
 import me.raska.opendvs.base.artifact.ArtifactSource;
 import me.raska.opendvs.base.model.artifact.Artifact;
@@ -15,7 +16,7 @@ public class FilesystemArtifactSource implements ArtifactSource {
     }
 
     @Override
-    public File getResource(Artifact artifact) throws FileNotFoundException {
+    public File getResource(Artifact artifact, Map<String, String> typeProperties) throws FileNotFoundException {
         File f = new File(artifact.getUri());
         if (!f.exists()) {
             throw new FileNotFoundException("Resource " + artifact.getUri() + " doesn't exist");

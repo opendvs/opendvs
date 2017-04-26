@@ -50,7 +50,7 @@ public class FilesystemArtifactSourceTest {
 
     @Test(expected = NullPointerException.class)
     public void testNullResource() throws FileNotFoundException {
-        source.getResource(null);
+        source.getResource(null, null);
     }
 
     // @Test(expected = FileNotFoundException.class)

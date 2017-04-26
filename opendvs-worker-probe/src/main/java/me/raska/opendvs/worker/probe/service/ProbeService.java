@@ -50,7 +50,7 @@ public class ProbeService {
         logger.info("Started processing of action " + action.getId());
 
         try {
-            context.setArtifactFile(fetchArtifact(art));
+            context.setArtifactFile(fetchArtifact(art, action.getProjectTypeProperties()));
         } catch (Exception e) {
             logger.warn("Cannot download artifact " + art.getId(), e);
             action.getSteps().add(Util.generateErrorStep(e.getMessage()));
@@ -147,13 +147,13 @@ public class ProbeService {
         logger.info("Ended processing of action " + action.getId());
     }
 
-    private File fetchArtifact(Artifact art) throws Exception {
+    private File fetchArtifact(Artifact art, Map<String, String> typeProperties) throws Exception {
         if (!artifactSources.containsKey(art.getSourceType())) {
             throw new UnsatisfiedDependencyException(
                     "Artifact type " + art.getSourceType() + " not found for artifact " + art.getId());
         }
 
-        return artifactSources.get(art.getSourceType()).getResource(art);
+        return artifactSources.get(art.getSourceType()).getResource(art, typeProperties);
     }
 
     private void cleanupArtifact(Artifact art, ProbingContext context) throws Exception {
