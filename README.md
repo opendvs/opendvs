@@ -1,4 +1,5 @@
 # OpenDVS
+[![Build Status](https://travis-ci.org/opendvs/opendvs.svg?branch=master)](https://travis-ci.org/opendvs/opendvs)
 
 This platform serves as dependency analyzer of applications and determine their states. It detects outdated components with regards to default repositories (ATM) and vulnerabilities against NVD.
 
